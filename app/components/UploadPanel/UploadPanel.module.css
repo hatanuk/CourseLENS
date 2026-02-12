@@ -1,0 +1,199 @@
+.panel {
+  padding: 1rem;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.dropArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  border: 2px dashed #ccc;
+  border-radius: 6px;
+  text-align: center;
+  margin-bottom: 0.75rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  min-height: 150px;
+}
+
+.dropArea:hover {
+  border-color: #999;
+}
+
+.dropAreaDragging {
+  background: #eee;
+}
+
+.dropEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.dropIcon {
+  font-size: 2rem;
+}
+
+.dropText {
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.dropHint {
+  font-size: 1rem;
+  color: #999;
+}
+
+.fileTypeChips {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 1.2rem;
+  margin-top: 1.3rem;
+  flex-wrap: wrap;
+}
+
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 0.35rem 0.9rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+}
+
+.chipIcon {
+  display: flex;
+}
+
+.chipLabel {
+  font-size: 0.97rem;
+}
+
+.filePreviews {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+.filePreviewWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+.limitRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.limitIndicator {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.clearAllBtn {
+  background: none;
+  border: none;
+  color: #64748b;
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.clearAllBtn:hover {
+  color: #e34d3d;
+}
+
+.removeBtn {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  padding: 4px;
+  background: rgba(0, 0, 0, 0.1);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.filePreview:hover .removeBtn {
+  opacity: 1;
+}
+
+.removeBtn:hover {
+  background: rgba(0, 0, 0, 0.2);
+  color: #333;
+}
+
+/* Shared with FilePreview */
+.filePreview {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 120px;
+  height: 120px;
+  padding: 0.75rem;
+  background: #eee;
+  border-radius: 4px;
+  gap: 0.35rem;
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+.fileType {
+  color: rgba(0, 0, 0, 0.55);
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+}
+
+.fileLabel {
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.75rem;
+}
+
+.submitBtn {
+  width: 100%;
+  padding: 0.5rem;
+  background: #4a4a6a;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.submitBtn:hover {
+  background: #5a5a8a;
+}
+
+.submitBtn:disabled {
+  background: #5a5a8a6e;
+}
+
