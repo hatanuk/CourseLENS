@@ -1,0 +1,31 @@
+.coursesLayout {
+  display: flex;
+  height: 100%;
+}
+
+.coursesSidebar {
+  width: 280px;
+  padding: 1.5rem;
+  background: #fafafa;
+  border-right: 1px solid #e0e0e0;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.documentsArea {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+.heading {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.empty {
+  color: #999;
+  font-size: 0.9rem;
+}

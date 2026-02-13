@@ -1,0 +1,51 @@
+.topBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  background: #1a1a2e;
+  color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.brand {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #fff;
+  text-decoration: none;
+  display: inline-flex; 
+  gap: 0.2rem;
+  align-items: end;
+  font-family: var(--font-logo);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.actionBtn {
+  padding: 0.4rem 0.9rem;
+  background: #4a4a6a;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.actionBtn:hover {
+  background: #5a5a8a;
+}
+
+.statusPill {
+  padding: 0.3rem 0.7rem;
+  background: #f59e0b;
+  color: #000;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}

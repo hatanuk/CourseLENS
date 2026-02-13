@@ -1,0 +1,60 @@
+.courseList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.heading {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.card {
+  padding: 1rem;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.card:hover {
+  border-color: #999;
+}
+
+.card.selected {
+  border-color: #4a4a6a;
+  background: #f8f8ff;
+}
+
+.name {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.progress {
+  color: #16a34a;
+}
+
+.progressBar {
+  height: 4px;
+  background: #e5e5e5;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: #16a34a;
+  transition: width 0.3s;
+}

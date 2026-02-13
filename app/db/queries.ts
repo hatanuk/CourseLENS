@@ -64,6 +64,10 @@ export function getFileMetadataByUploadId(uploadId: string): FileMetadata | unde
     return getFileMetadataByUploadIdStmt.get(uploadId) as FileMetadata | undefined;
 }
 
+export function getAllFileMetadataByUploadId(uploadId: string): FileMetadata[] {
+    return getFileMetadataByUploadIdStmt.all(uploadId) as FileMetadata[];
+}
+
 export function getUpload(id: string): Upload | undefined {
     return getUploadStmt.get(id) as Upload | undefined;
 }

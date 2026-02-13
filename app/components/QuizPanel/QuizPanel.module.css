@@ -1,0 +1,109 @@
+.panel {
+  padding: 1rem;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.heading {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.section {
+  margin-bottom: 1rem;
+}
+
+.label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #666;
+  margin-bottom: 0.35rem;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  min-height: 2rem;
+  padding: 0.5rem;
+  background: #f5f5f5;
+  border-radius: 4px;
+}
+
+.chip {
+  padding: 0.2rem 0.5rem;
+  background: #4a4a6a;
+  color: #fff;
+  border-radius: 3px;
+  font-size: 0.7rem;
+}
+
+.hint {
+  color: #999;
+  font-size: 0.75rem;
+}
+
+.select,
+.input {
+  width: 100%;
+  padding: 0.4rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.generateBtn {
+  width: 100%;
+  padding: 0.6rem;
+  background: #4a4a6a;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+
+.generateBtn:hover {
+  background: #5a5a8a;
+}
+
+.questions {
+  margin-top: 1.5rem;
+}
+
+.subheading {
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 0.75rem;
+}
+
+.question {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: #f9f9f9;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.qNumber {
+  font-weight: 600;
+  color: #666;
+}
+
+.qText {
+  flex: 1;
+}
+
+.qType {
+  padding: 0.1rem 0.4rem;
+  background: #e0e0e0;
+  border-radius: 3px;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+}

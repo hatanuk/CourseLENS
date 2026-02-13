@@ -1,12 +1,13 @@
 'use client';
 
-import { startTransition, useActionState, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { getIcon } from './FilePreview';
 import FilePreview from './FilePreview';
 import styles from './UploadPanel.module.css';
-import handleUpload from '@/app/actions/upload';
 import { ACCEPTED_MIME_TYPES, isAcceptedFile } from '@/app/data/upload';
+import Loading from '../Loading';
 
 const MAX_FILES = 6;
 
@@ -18,24 +19,38 @@ const FILE_TYPES = [
 ] as const;
 
 export default function UploadPanel() {
+  const router = useRouter();
   const [files, setFiles] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const canSubmit = files.length > 0
-
-  const [state, upload, pending] = useActionState(handleUpload, null)
+  const canSubmit = files.length > 0;
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit() {
-    const fd = new FormData()
-  
-    files.forEach(file => {
-      fd.append("files", file)
-    })
-  
-    startTransition(() => {
-      upload(fd)
-    })
+    const fd = new FormData();
+    files.forEach((file) => fd.append("files", file));
+    setPending(true);
+    setError(null);
+    const start = Date.now();
+    let redirecting = false;
+    try {
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      const data = await res.json();
+      await new Promise((r) => setTimeout(r, Math.max(0, 1000 - (Date.now() - start))));
+      if (data.ok && data.redirectTo) {
+        router.replace(data.redirectTo);
+        redirecting = true;
+      } else {
+        setError(data.error ?? "Upload failed");
+      }
+    } catch {
+      await new Promise((r) => setTimeout(r, Math.max(0, 1000 - (Date.now() - start))));
+      setError("Upload failed");
+    } finally {
+      if (!redirecting) setPending(false);
+    }
   }
 
   function handleDragOver(e: React.DragEvent<HTMLDivElement>) {
@@ -70,15 +85,13 @@ export default function UploadPanel() {
   function handleDrop(e: React.DragEvent<HTMLDivElement>) {
     e.preventDefault();
     setIsDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (file && isAcceptedFile(file)) {
-      addFiles([file]);
-    }
+    const dropped = Array.from(e.dataTransfer.files).filter(isAcceptedFile);
+    addFiles(dropped);
   }
 
   const dropAreaClass = `${styles.dropArea} ${isDragging ? styles.dropAreaDragging : ''}`;
 
-  return (
+  return pending ? <Loading /> : (
     <div className={styles.panel}>
       <div
         className={dropAreaClass}
@@ -128,6 +141,7 @@ export default function UploadPanel() {
         )}
       </div>
 
+      {error && <div className={styles.error}>{error}</div>}
       <button
         className={styles.submitBtn}
         disabled={!canSubmit || pending}
@@ -143,15 +157,15 @@ export default function UploadPanel() {
         )}
       </button>
 
-        <input
-          type="file"
-          name="files"
-          ref={inputRef}
-          onChange={handleFileSelect}
-          accept={ACCEPTED_MIME_TYPES.join(',')}
-          multiple
-          hidden
-        />
+      <input
+        type="file"
+        name="files"
+        ref={inputRef}
+        onChange={handleFileSelect}
+        accept={ACCEPTED_MIME_TYPES.join(',')}
+        multiple
+        hidden
+      />
     </div>
   );
 }
