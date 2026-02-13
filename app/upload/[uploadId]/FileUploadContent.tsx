@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import type { FileMetadata } from '@/app/data/structures';
 import styles from './UploadPage.module.css';
 
@@ -22,6 +22,7 @@ export default function FileUploadContent({ files: initialFiles, uploadId, setAl
   const [filesWithProgress, setFilesWithProgress] = useState<FileWithProgress[]>(() =>
     initialFiles.map((f) => ({ ...f, status: 'pending' as ProcessingStatus, progress: 0 }))
   );
+  const startedRef = useRef(false);
 
   useEffect(() => {
     const allDone =
@@ -29,6 +30,47 @@ export default function FileUploadContent({ files: initialFiles, uploadId, setAl
       filesWithProgress.every((f) => f.status === "done");
     setAllProcessed(allDone);
   }, [filesWithProgress, setAllProcessed]);
+
+  useEffect(() => {
+    if (startedRef.current || initialFiles.length === 0) return;
+    startedRef.current = true;
+
+    async function processAll() {
+      for (let i = 0; i < initialFiles.length; i++) {
+        const file = initialFiles[i];
+        setFilesWithProgress((prev) =>
+          prev.map((f) =>
+            f.id === file.id ? { ...f, status: 'processing' as ProcessingStatus, progress: 0 } : f
+          )
+        );
+
+        try {
+          const res = await fetch('/api/process', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ uploadId, fileId: file.id }),
+          });
+          const data = await res.json();
+
+          setFilesWithProgress((prev) =>
+            prev.map((f) =>
+              f.id === file.id
+                ? { ...f, status: data.ok ? 'done' : 'error', progress: data.ok ? 100 : 0 }
+                : f
+            )
+          );
+        } catch {
+          setFilesWithProgress((prev) =>
+            prev.map((f) =>
+              f.id === file.id ? { ...f, status: 'error' as ProcessingStatus, progress: 0 } : f
+            )
+          );
+        }
+      }
+    }
+
+    processAll();
+  }, [uploadId, initialFiles]);
 
   if (filesWithProgress.length === 0) {
     return (
