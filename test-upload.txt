@@ -1,0 +1,1 @@
+This is a test document for the RAG pipeline. It contains sample text to verify that chunking, embedding, clustering, and Qdrant storage work correctly.

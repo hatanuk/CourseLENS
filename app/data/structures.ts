@@ -11,9 +11,9 @@ export interface FileMetadata {
 
 export interface Course {
   id: string;
+  sessionId: string;
   name: string;
-  documentCount: number;
-  indexedCount: number;
+
 }
 
 export interface Document {
@@ -55,4 +55,13 @@ export interface Upload {
   sessionId: string;
   createdAt: string;
   consumedAt: string | null;
+  courseId?: string | null;
+}
+
+export interface Cluster {
+  id: string
+  uploadId: string | null
+  courseId: string | null
+  topic: string
+  summary: string
 }

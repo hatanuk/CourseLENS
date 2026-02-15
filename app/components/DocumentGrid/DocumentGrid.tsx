@@ -1,11 +1,18 @@
 'use client';
 
 import Link from 'next/link';
-import { Document } from '@/app/data/structures';
 import styles from './DocumentGrid.module.css';
 
+interface DocumentWithName {
+  id: string;
+  type: string;
+  status: string;
+  lastIndexed: string | null;
+  originalName: string;
+}
+
 interface DocumentGridProps {
-  documents: Document[];
+  documents: DocumentWithName[];
   courseId: string;
   onReindex: (docId: string) => void;
 }
@@ -30,7 +37,7 @@ export default function DocumentGrid({ documents, courseId, onReindex }: Documen
       {documents.map(doc => (
         <div key={doc.id} className={styles.card}>
           <div className={styles.header}>
-            <span className={styles.title}>{doc.id}</span>
+            <span className={styles.title}>{doc.originalName}</span>
           </div>
           <div className={styles.badges}>
             <span className={styles.badge} style={{ background: typeColors[doc.type] }}>

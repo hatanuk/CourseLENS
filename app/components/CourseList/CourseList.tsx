@@ -21,16 +21,8 @@ export default function CourseList({ courses, selectedId, onSelect }: CourseList
         >
           <div className={styles.name}>{course.name}</div>
           <div className={styles.meta}>
-            <span>{course.documentCount} docs</span>
-            <span className={styles.progress}>
-              {Math.round((course.indexedCount / course.documentCount) * 100)}% indexed
-            </span>
           </div>
           <div className={styles.progressBar}>
-            <div
-              className={styles.progressFill}
-              style={{ width: `${(course.indexedCount / course.documentCount) * 100}%` }}
-            />
           </div>
         </div>
       ))}

@@ -5,7 +5,7 @@ import pLimit from "p-limit";
 import { insertFileMetadata, insertUpload } from "../../db/queries";
 import type { FileMetadata } from "../../data/structures";
 import { validateFileTypeFromBuffer } from "../../data/upload";
-import { getOrCreateSessionId } from "../../lib/sessionHandler";
+import { getSessionId } from "../../lib/sessionHandler";
 
 type UploadResult =
     | { ok: true; redirectTo: string }
@@ -35,7 +35,10 @@ export async function POST(request: Request): Promise<NextResponse<UploadResult>
         return NextResponse.json({ ok: false, error: "No files provided" }, { status: 400 })
     }
 
-    const sessionId = await getOrCreateSessionId()
+    const sessionId = await getSessionId()
+    if (!sessionId) {
+        return NextResponse.json({ ok: false, error: "No session id set" }, { status: 400 })
+    }
 
     // Persist the files
     const uploadDir = path.join(process.cwd(), "app", "data", "uploads")
@@ -49,7 +52,7 @@ export async function POST(request: Request): Promise<NextResponse<UploadResult>
                 fileWriteLimit(async () => {
                     const fileId = `${crypto.randomUUID()}`
                     const buffer = Buffer.from(await file.arrayBuffer())
-                    const fileType = await validateFileTypeFromBuffer(buffer)
+                    const fileType = await validateFileTypeFromBuffer(buffer, file.name)
                     const filePath = path.join(uploadDir, fileId)
 
                     const meta: FileMetadata = {

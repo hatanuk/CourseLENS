@@ -7,6 +7,7 @@ db.pragma("foreign_keys = ON");
 db.exec(`
     CREATE TABLE IF NOT EXISTS courses (
       id TEXT PRIMARY KEY,
+      sessionId TEXT NOT NULL,
       name TEXT NOT NULL
     );
     
@@ -14,7 +15,8 @@ db.exec(`
       id TEXT PRIMARY KEY,
       sessionId TEXT NOT NULL,
       createdAt TEXT NOT NULL,
-      consumedAt TEXT
+      consumedAt TEXT,
+      courseId TEXT
     );
 
     CREATE TABLE IF NOT EXISTS fileMetadata (
@@ -72,5 +74,14 @@ db.exec(`
       content TEXT NOT NULL,
       createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (sessionId) REFERENCES sessions(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS clusters (
+      id TEXT PRIMARY KEY,
+      uploadId TEXT,
+      courseId TEXT,
+      topic TEXT NOT NULL,
+      summary TEXT NOT NULL,
+      FOREIGN KEY (courseId) REFERENCES courses(id) ON DELETE CASCADE
     );
 `);

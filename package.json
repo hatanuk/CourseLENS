@@ -3,25 +3,30 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "concurrently \"next dev\" \"cd app/embeddings-server && uvicorn main:app --reload --port 8000\"",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "wipe-qdrant": "node --env-file=.env scripts/wipe-qdrant.mjs"
   },
   "dependencies": {
+    "@qdrant/js-client-rest": "^1.16.2",
     "better-sqlite3": "^12.6.2",
     "file-type": "^21.3.0",
     "lucide-react": "^0.563.0",
     "next": "16.1.5",
+    "openai": "^6.21.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "unstructured-client": "^0.30.3"
+    "unstructured-client": "^0.30.3",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "concurrently": "^9.1.2",
     "eslint": "^9",
     "eslint-config-next": "16.1.5",
     "typescript": "^5"

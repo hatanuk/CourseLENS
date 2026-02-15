@@ -2,9 +2,10 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, run the development server:
+First, activate the Python venv (for the embeddings server), then run:
 
 ```bash
+source venv/bin/activate  # Windows: .\venv\Scripts\activate
 npm run dev
 # or
 yarn dev
@@ -14,7 +15,7 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+This starts Next.js (port 3000) and the embeddings API (port 8000). Open [http://localhost:3000](http://localhost:3000) with your browser.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 

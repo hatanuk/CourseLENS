@@ -1,14 +1,19 @@
 import { db } from "./schema";
-import type { Course, Document, FileMetadata, IndexNode, QuizQuestion, ChatMessage, Session, Upload } from '../data/structures';
+import type { Course, Document, FileMetadata, IndexNode, QuizQuestion, ChatMessage, Session, Upload, Cluster } from '../data/structures';
 
 // === Fetch Statements ===
-const getAllCoursesStmt = db.prepare("SELECT * FROM courses");
+const getAllCoursesStmt = db.prepare("SELECT * FROM courses WHERE sessionId = ?");
 const getCourseStmt = db.prepare("SELECT * FROM courses WHERE id = ?");
+const getCourseByNameStmt = db.prepare("SELECT * FROM courses WHERE sessionId = ? AND name = ?");
 const getCourseDocsStmt = db.prepare("SELECT * FROM documents WHERE courseId = ?");
 const getDocumentStmt = db.prepare("SELECT * FROM documents WHERE id = ?");
 const getFileMetadataStmt = db.prepare("SELECT * FROM fileMetadata WHERE id = ?");
 const getFileMetadataByUploadIdStmt = db.prepare("SELECT * FROM fileMetadata WHERE uploadId = ?");
 const getUploadStmt = db.prepare("SELECT * FROM uploads WHERE id = ?");
+const updateUploadCourseIdStmt = db.prepare("UPDATE uploads SET courseId = ? WHERE id = ?");
+const updateUploadConsumedStmt = db.prepare("UPDATE uploads SET consumedAt = ? WHERE id = ?");
+const updateDocumentCourseIdStmt = db.prepare("UPDATE documents SET courseId = ? WHERE id = ?");
+const updateClustersCourseIdByUploadStmt = db.prepare("UPDATE clusters SET courseId = ? WHERE uploadId = ?");
 const getUploadsBySessionIdStmt = db.prepare("SELECT * FROM uploads WHERE sessionId = ? ORDER BY createdAt DESC");
 const getAllSessionsStmt = db.prepare("SELECT * FROM sessions ORDER BY date DESC");
 const getSessionsByCourseStmt = db.prepare("SELECT * FROM sessions WHERE courseId = ? ORDER BY date DESC");
@@ -18,7 +23,7 @@ const getIndexNodesStmt = db.prepare("SELECT * FROM indexNodes WHERE documentId 
 
 // === Insert Statements ===
 const insertCourseStmt = db.prepare(
-    "INSERT OR REPLACE INTO courses (id, name, documentCount, indexedCount) VALUES (?, ?, ?, ?)"
+    "INSERT OR REPLACE INTO courses (id, sessionId, name) VALUES (?, ?, ?)"
 );
 const insertUploadStmt = db.prepare(
     "INSERT OR REPLACE INTO uploads (id, sessionId, createdAt, consumedAt) VALUES (?, ?, ?, ?)"
@@ -38,18 +43,33 @@ const insertChatMessageStmt = db.prepare(
 const insertIndexNodeStmt = db.prepare(
     "INSERT OR REPLACE INTO indexNodes (id, documentId, parentId, title, level, sortOrder) VALUES (?, ?, ?, ?, ?, ?)"
 );
+const insertClusterStmt = db.prepare(
+    "INSERT OR REPLACE INTO clusters (id, uploadId, courseId, topic, summary) VALUES (?, ?, ?, ?, ?)"
+);
 
 // === Query Functions ===
-export function getAllCourses(): Course[] {
-    return getAllCoursesStmt.all() as Course[];
+export function getAllCourses(sessionId: string): Course[] {
+    return getAllCoursesStmt.all(sessionId) as Course[];
 }
 
 export function getCourse(courseId: string): Course | undefined {
     return getCourseStmt.get(courseId) as Course | undefined;
 }
 
+export function getCourseByName(sessionId: string, name: string): Course | undefined {
+    return getCourseByNameStmt.get(sessionId, name) as Course | undefined;
+}
+
 export function getCourseDocs(courseId: string): Document[] {
     return getCourseDocsStmt.all(courseId) as Document[];
+}
+
+export function getCourseDocsWithNames(courseId: string): (Document & { originalName: string })[] {
+    const docs = getCourseDocsStmt.all(courseId) as Document[];
+    return docs.map((doc) => {
+        const meta = getFileMetadataStmt.get(doc.id) as FileMetadata | undefined;
+        return { ...doc, originalName: meta?.originalName ?? doc.id };
+    });
 }
 
 export function getDocument(id: string): Document | undefined {
@@ -70,6 +90,24 @@ export function getAllFileMetadataByUploadId(uploadId: string): FileMetadata[] {
 
 export function getUpload(id: string): Upload | undefined {
     return getUploadStmt.get(id) as Upload | undefined;
+}
+
+export function updateUploadCourseId(uploadId: string, courseId: string): void {
+    updateUploadCourseIdStmt.run(courseId, uploadId);
+}
+
+export function updateUploadConsumed(uploadId: string): void {
+    updateUploadConsumedStmt.run(new Date().toISOString(), uploadId);
+}
+
+export function updateDocumentsCourseId(fileIds: string[], courseId: string): void {
+    for (const id of fileIds) {
+        updateDocumentCourseIdStmt.run(courseId, id);
+    }
+}
+
+export function updateClustersCourseIdByUpload(uploadId: string, courseId: string): void {
+    updateClustersCourseIdByUploadStmt.run(courseId, uploadId);
 }
 
 export function getUploadsBySessionId(sessionId: string): Upload[] {
@@ -139,7 +177,7 @@ export function insertFileMetadata(meta: FileMetadata): void {
 }
 
 export function insertCourse(course: Course): void {
-    insertCourseStmt.run(course.id, course.name, course.documentCount, course.indexedCount);
+    insertCourseStmt.run(course.id, course.sessionId, course.name);
 }
 
 export function insertDocument(doc: Document): void {
@@ -154,6 +192,10 @@ export function insertChatMessage(sessionId: string, msg: ChatMessage): void {
     insertChatMessageStmt.run(msg.id, sessionId, msg.role, msg.content);
 }
 
+export function insertCluster(cluster: Cluster): void {
+    insertClusterStmt.run(cluster.id, cluster.uploadId ?? null, cluster.courseId ?? null, cluster.topic, cluster.summary)
+}
+
 export function insertIndexTree(documentId: string, nodes: IndexNode[], parentId: string | null = null, startOrder = 0): number {
     let order = startOrder;
     for (const node of nodes) {
@@ -165,30 +207,3 @@ export function insertIndexTree(documentId: string, nodes: IndexNode[], parentId
     return order;
 }
 
-// === Seeding ===
-export function seedDatabase(): void {
-    const existing = getAllCoursesStmt.all();
-    if (existing.length > 0) return;
-
-    const { courses, documents, sampleIndex, mockSessions, mockChatHistory } = require('../data/mock');
-
-    for (const course of courses) insertCourse(course);
-    for (const doc of documents) insertDocument(doc);
-
-    if (documents.length > 0) {
-        insertIndexTree(documents[0].id, sampleIndex);
-    }
-
-    for (const session of mockSessions) {
-        insertSession({ ...session, courseId: 'cs101' });
-    }
-
-    const chatSession = mockSessions.find((s: Session) => s.type === 'chat');
-    if (chatSession) {
-        for (const msg of mockChatHistory) {
-            insertChatMessage(chatSession.id, msg);
-        }
-    }
-}
-
-seedDatabase();

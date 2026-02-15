@@ -3,12 +3,10 @@
 import Link from 'next/link';
 import styles from './TopBar.module.css';
 import { Blend } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
-interface TopBarProps {
-  indexingCount?: number;
-}
-
-export default function TopBar({ indexingCount = 1 }: TopBarProps) {
+export default function TopBar() {
+  const router = useRouter()
   return (
     <header className={styles.topBar}>
       <Link href="/" className={styles.brand}>
@@ -16,15 +14,12 @@ export default function TopBar({ indexingCount = 1 }: TopBarProps) {
         LENS
       </Link>
       <div className={styles.actions}>
-        <button className={styles.actionBtn} onClick={() => alert('Upload clicked')}>
+        <button className={styles.actionBtn} onClick={() => router.push("/")}>
           Upload
         </button>
         <button className={styles.actionBtn} onClick={() => alert('New course clicked')}>
           New course
         </button>
-        <span className={styles.statusPill}>
-          Indexing: {indexingCount}
-        </span>
       </div>
     </header>
   );

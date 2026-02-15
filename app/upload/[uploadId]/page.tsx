@@ -1,5 +1,5 @@
 import { getSessionId } from "@/app/lib/sessionHandler";
-import { getUpload, getAllFileMetadataByUploadId } from "@/app/db/queries";
+import { getUpload, getAllFileMetadataByUploadId, getAllCourses } from "@/app/db/queries";
 import { notFound, redirect } from "next/navigation"
 import AppShell from "@/app/components/AppShell";
 import { Suspense } from "react";
@@ -20,9 +20,10 @@ async function UploadContent({ uploadId }: { uploadId: string }) {
     }
 
     const files = getAllFileMetadataByUploadId(uploadId);
+    const courses = getAllCourses(sessionId);
 
     return (
-        <UploadPageWrapper files={files} uploadId={uploadId} />
+        <UploadPageWrapper files={files} uploadId={uploadId} courses={courses} consumedAt={upload.consumedAt} />
     );
 }
 

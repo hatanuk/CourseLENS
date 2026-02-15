@@ -1,14 +1,23 @@
 'use client';
 
 import { useState } from 'react';
-import type { Course, Document } from '../data/structures';
+import type { Course } from '../data/structures';
 import CourseList from '../components/CourseList';
 import DocumentGrid from '../components/DocumentGrid';
 import styles from './courses.module.css';
 
+interface DocWithName {
+  id: string;
+  courseId: string | null;
+  type: 'pdf' | 'video' | 'image';
+  status: string;
+  lastIndexed: string | null;
+  originalName: string;
+}
+
 interface Props {
   courses: Course[];
-  allDocs: Record<string, Document[]>;
+  allDocs: Record<string, DocWithName[]>;
 }
 
 export default function CoursesClient({ courses, allDocs }: Props) {
@@ -41,7 +50,9 @@ export default function CoursesClient({ courses, allDocs }: Props) {
             onReindex={handleReindex}
           />
         ) : (
-          <p className={styles.empty}>Select a course to view documents</p>
+          <p className={styles.empty}>
+            No documents under this course.
+          </p>
         )}
       </section>
     </div>

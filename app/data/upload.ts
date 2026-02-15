@@ -19,8 +19,22 @@ export function isAcceptedFile(file: File): boolean {
   return isAcceptedMimeType(file.type);
 }
 
-export async function validateFileTypeFromBuffer(buffer: Uint8Array | ArrayBuffer): Promise<FileTypeResult> {
-  const fileType = (await fileTypeFromBuffer(buffer))
+const EXT_TO_MIME: Record<string, string> = {
+  txt: "text/plain",
+  md: "text/markdown",
+}
+
+export async function validateFileTypeFromBuffer(
+  buffer: Uint8Array | ArrayBuffer,
+  filename?: string
+): Promise<FileTypeResult> {
+  let fileType = await fileTypeFromBuffer(buffer)
+  if (!fileType && filename) {
+    const ext = filename.split(".").pop()?.toLowerCase()
+    if (ext && EXT_TO_MIME[ext] && isAcceptedMimeType(EXT_TO_MIME[ext])) {
+      fileType = { ext, mime: EXT_TO_MIME[ext] } as FileTypeResult
+    }
+  }
   if (!fileType || !isAcceptedMimeType(fileType.mime)) {
     throw Error("File type is not supported")
   }

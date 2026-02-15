@@ -61,19 +61,13 @@ export default function CourseClient({ course, docs, sessions, courseId }: Props
 
         <div className={styles.stats}>
           <div className={styles.stat}>
-            <span className={styles.statValue}>{course.documentCount}</span>
             <span className={styles.statLabel}>Documents</span>
           </div>
           <div className={styles.stat}>
-            <span className={styles.statValue}>{course.indexedCount}</span>
             <span className={styles.statLabel}>Indexed</span>
           </div>
           <div className={styles.stat}>
-            <span className={styles.statValue}>
-              {course.documentCount > 0
-                ? Math.round((course.indexedCount / course.documentCount) * 100)
-                : 0}%
-            </span>
+           
             <span className={styles.statLabel}>Complete</span>
           </div>
         </div>

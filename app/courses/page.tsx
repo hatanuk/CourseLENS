@@ -1,17 +1,26 @@
-import { getAllCourses, getCourseDocs } from '../db/queries';
+import { getAllCourses, getCourseDocsWithNames } from '../db/queries';
 import AppShell from '../components/AppShell';
 import CoursesClient from './CoursesClient';
+import { getSessionId } from '../lib/sessionHandler';
+import { Course } from '../data/structures';
+import TopBar from '../components/TopBar';
 
-export default function CoursesPage() {
-  const courses = getAllCourses();
+export default async function CoursesPage() {
 
-  const allDocs: Record<string, ReturnType<typeof getCourseDocs>> = {};
+  const sessionId = await getSessionId()
+  let courses: Course[] = []
+  if (sessionId) {
+    courses = getAllCourses(sessionId)
+  }
+
+  const allDocs: Record<string, ReturnType<typeof getCourseDocsWithNames>> = {};
   for (const course of courses) {
-    allDocs[course.id] = getCourseDocs(course.id);
+    allDocs[course.id] = getCourseDocsWithNames(course.id);
   }
 
   return (
     <AppShell>
+      <TopBar />
       <CoursesClient courses={courses} allDocs={allDocs} />
     </AppShell>
   );
