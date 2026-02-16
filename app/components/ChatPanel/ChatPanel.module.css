@@ -15,7 +15,7 @@
 }
 
 .contextLabel {
-  font-size: 0.7rem;
+  font-size: 1rem;
   color: #666;
 }
 
@@ -24,11 +24,11 @@
   background: #4a4a6a;
   color: #fff;
   border-radius: 3px;
-  font-size: 0.65rem;
+  font-size: 1rem;
 }
 
 .contextMore {
-  font-size: 0.65rem;
+  font-size: 1rem;
   color: #666;
 }
 
@@ -47,7 +47,7 @@
 }
 
 .messageRole {
-  font-size: 0.65rem;
+  font-size: 1rem;
   color: #999;
   margin-bottom: 0.2rem;
 }
@@ -56,7 +56,7 @@
   display: inline-block;
   padding: 0.5rem 0.75rem;
   border-radius: 8px;
-  font-size: 0.8rem;
+  font-size: 1rem;
   max-width: 85%;
   text-align: left;
 }
@@ -83,7 +83,7 @@
   padding: 0.5rem;
   border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 0.85rem;
+  font-size: 1rem;
 }
 
 .sendBtn {
@@ -93,7 +93,7 @@
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 0.85rem;
+  font-size: 1rem;
 }
 
 .sendBtn:hover {

@@ -22,7 +22,7 @@
   padding: 0.5rem;
   border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 0.85rem;
+  font-size: 1rem;
   margin-bottom: 1rem;
 }
 
@@ -47,7 +47,7 @@
 }
 
 .docTitle {
-  font-size: 0.85rem;
+  font-size: 1rem;
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -57,7 +57,7 @@
 .statusBadge {
   padding: 0.15rem 0.4rem;
   border-radius: 3px;
-  font-size: 0.65rem;
+  font-size: 1rem;
   color: #fff;
   text-transform: uppercase;
   margin-left: 0.5rem;
@@ -97,7 +97,7 @@
 }
 
 .statLabel {
-  font-size: 0.8rem;
+  font-size: 1rem;
   color: #666;
 }
 
@@ -140,7 +140,7 @@
 }
 
 .sessionDate {
-  font-size: 0.8rem;
+  font-size: 1rem;
   color: #999;
 }
 

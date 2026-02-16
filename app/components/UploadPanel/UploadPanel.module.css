@@ -76,7 +76,7 @@
 }
 
 .chipLabel {
-  font-size: 0.97rem;
+  font-size: 1rem;
 }
 
 .filePreviews {
@@ -104,7 +104,7 @@
 }
 
 .limitIndicator {
-  font-size: 0.85rem;
+  font-size: 1rem;
   color: #64748b;
 }
 
@@ -112,7 +112,7 @@
   background: none;
   border: none;
   color: #64748b;
-  font-size: 0.85rem;
+  font-size: 1rem;
   cursor: pointer;
   text-decoration: underline;
 }
@@ -167,7 +167,7 @@
 .fileType {
   color: rgba(0, 0, 0, 0.55);
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 1rem;
   letter-spacing: 0.05em;
 }
 
@@ -176,12 +176,12 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 0.75rem;
+  font-size: 1rem;
 }
 
 .error {
   color: #e34d3d;
-  font-size: 0.875rem;
+  font-size: 1rem;
   margin-bottom: 0.5rem;
 }
 
@@ -193,7 +193,7 @@
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 0.875rem;
+  font-size: 1rem;
 }
 
 .submitBtn:hover {

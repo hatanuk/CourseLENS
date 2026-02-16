@@ -1,9 +1,10 @@
 import { UnstructuredClient } from "unstructured-client";
 import { Strategy } from "unstructured-client/sdk/models/shared";
-import { readFile } from "fs/promises";
+import { readFile, writeFile, mkdir } from "fs/promises";
 import path from "path";
 
 const uploadDir = path.join(process.cwd(), "app", "data", "uploads");
+const figuresDir = path.join(process.cwd(), "app", "data", "figures");
 
 export async function processWithUnstructured(
   // performs partitioning and chunking within one call
@@ -33,9 +34,10 @@ export async function processWithUnstructured(
       strategy: Strategy.Auto,
       contentType: mimeType,
       chunkingStrategy: "by_title",
-      overlap: 150,
-      maxCharacters: 1000,
-      newAfterNChars: 800
+      overlap: 50,
+      maxCharacters: 500,
+      newAfterNChars: 250,
+      extractImageBlockTypes: ["Image"],
     },
   });
 
@@ -43,6 +45,30 @@ export async function processWithUnstructured(
     return res
   }
   return []
+}
+
+/** Extract images from elements, save to figures dir, return relative paths for serving */
+export async function extractAndSaveImages(
+  elements: unknown[],
+  documentId: string
+): Promise<string[]> {
+  const dir = path.join(figuresDir, documentId);
+  await mkdir(dir, { recursive: true });
+  const saved: string[] = [];
+  let idx = 0;
+  for (const el of elements) {
+    const e = el as { type?: string; metadata?: { image_base64?: string } };
+    if (e?.type === "Image" && typeof e?.metadata?.image_base64 === "string") {
+      const buf = Buffer.from(e.metadata.image_base64, "base64");
+      const ext = buf[0] === 0x89 && buf[1] === 0x50 ? "png" : "jpg";
+      const filename = `${idx}.${ext}`;
+      const filepath = path.join(dir, filename);
+      await writeFile(filepath, buf);
+      saved.push(`${documentId}/${filename}`);
+      idx++;
+    }
+  }
+  return saved;
 }
 
 /** Extract text chunks from Unstructured elements for embedding/clustering */

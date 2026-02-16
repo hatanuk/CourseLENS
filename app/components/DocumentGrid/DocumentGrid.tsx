@@ -2,17 +2,11 @@
 
 import Link from 'next/link';
 import styles from './DocumentGrid.module.css';
+import type { Document } from '@/app/data/structures';
 
-interface DocumentWithName {
-  id: string;
-  type: string;
-  status: string;
-  lastIndexed: string | null;
-  originalName: string;
-}
 
 interface DocumentGridProps {
-  documents: DocumentWithName[];
+  documents: Document[];
   courseId: string;
   onReindex: (docId: string) => void;
 }
@@ -37,7 +31,7 @@ export default function DocumentGrid({ documents, courseId, onReindex }: Documen
       {documents.map(doc => (
         <div key={doc.id} className={styles.card}>
           <div className={styles.header}>
-            <span className={styles.title}>{doc.originalName}</span>
+            <span className={styles.title}>{doc.name ?? doc.id}</span>
           </div>
           <div className={styles.badges}>
             <span className={styles.badge} style={{ background: typeColors[doc.type] }}>
@@ -47,8 +41,8 @@ export default function DocumentGrid({ documents, courseId, onReindex }: Documen
               {doc.status}
             </span>
           </div>
-          {doc.lastIndexed && (
-            <div className={styles.lastIndexed}>Last indexed: {doc.lastIndexed}</div>
+          {doc.dateAdded && (
+            <div className={styles.lastIndexed}>Added: {doc.dateAdded}</div>
           )}
           <div className={styles.actions}>
             <Link href={`/course/${courseId}/doc/${doc.id}`} className={styles.btn}>

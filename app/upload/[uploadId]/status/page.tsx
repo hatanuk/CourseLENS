@@ -1,11 +1,11 @@
 import { getSessionId } from "@/app/lib/sessionHandler";
-import { getUpload, getAllFileMetadataByUploadId, getCourse } from "@/app/db/queries";
+import { getUpload, getAllFileMetadataByUploadId } from "@/app/db/queries";
 import { notFound, redirect } from "next/navigation";
 import TopBar from "@/app/components/TopBar";
-import OptionsPageClient from "./OptionsPageClient";
+import StatusPageClient from "./StatusPageClient";
 import styles from "../UploadPage.module.css";
 
-export default async function OptionsPage({
+export default async function StatusPage({
   params,
   searchParams,
 }: {
@@ -22,13 +22,16 @@ export default async function OptionsPage({
   if (!upload || upload.sessionId !== sessionId) notFound();
 
   const files = getAllFileMetadataByUploadId(uploadId);
-  const course = courseId ? getCourse(courseId) : undefined;
 
   return (
     <>
       <TopBar />
       <div className={styles.container}>
-        <OptionsPageClient courseName={course?.name ?? null} files={files} />
+        <StatusPageClient
+          uploadId={uploadId}
+          courseId={courseId ?? null}
+          files={files}
+        />
       </div>
     </>
   );

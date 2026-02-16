@@ -10,7 +10,6 @@ const getDocumentStmt = db.prepare("SELECT * FROM documents WHERE id = ?");
 const getFileMetadataStmt = db.prepare("SELECT * FROM fileMetadata WHERE id = ?");
 const getFileMetadataByUploadIdStmt = db.prepare("SELECT * FROM fileMetadata WHERE uploadId = ?");
 const getUploadStmt = db.prepare("SELECT * FROM uploads WHERE id = ?");
-const updateUploadCourseIdStmt = db.prepare("UPDATE uploads SET courseId = ? WHERE id = ?");
 const updateUploadConsumedStmt = db.prepare("UPDATE uploads SET consumedAt = ? WHERE id = ?");
 const updateDocumentCourseIdStmt = db.prepare("UPDATE documents SET courseId = ? WHERE id = ?");
 const updateClustersCourseIdByUploadStmt = db.prepare("UPDATE clusters SET courseId = ? WHERE uploadId = ?");
@@ -20,6 +19,7 @@ const getSessionsByCourseStmt = db.prepare("SELECT * FROM sessions WHERE courseI
 const getChatMessagesStmt = db.prepare("SELECT * FROM chatMessages WHERE sessionId = ? ORDER BY createdAt");
 const getQuizQuestionsStmt = db.prepare("SELECT * FROM quizQuestions WHERE sessionId = ?");
 const getIndexNodesStmt = db.prepare("SELECT * FROM indexNodes WHERE documentId = ? ORDER BY sortOrder");
+const getClustersByCourseIdStmt = db.prepare("SELECT * FROM clusters WHERE courseId = ? ORDER BY topic");
 
 // === Insert Statements ===
 const insertCourseStmt = db.prepare(
@@ -32,7 +32,7 @@ const insertFileMetadataStmt = db.prepare(
     "INSERT OR REPLACE INTO fileMetadata (id, uploadId, originalName, mimeType, ext, size) VALUES (?, ?, ?, ?, ?, ?)"
 );
 const insertDocumentStmt = db.prepare(
-    "INSERT OR REPLACE INTO documents (id, courseId, type, status, lastIndexed) VALUES (?, ?, ?, ?, ?)"
+    "INSERT OR REPLACE INTO documents (id, name, courseId, type, status, dateAdded) VALUES (?, ?, ?, ?, ?, ?)"
 );
 const insertSessionStmt = db.prepare(
     "INSERT OR REPLACE INTO sessions (id, title, type, courseId, date) VALUES (?, ?, ?, ?, ?)"
@@ -64,12 +64,8 @@ export function getCourseDocs(courseId: string): Document[] {
     return getCourseDocsStmt.all(courseId) as Document[];
 }
 
-export function getCourseDocsWithNames(courseId: string): (Document & { originalName: string })[] {
-    const docs = getCourseDocsStmt.all(courseId) as Document[];
-    return docs.map((doc) => {
-        const meta = getFileMetadataStmt.get(doc.id) as FileMetadata | undefined;
-        return { ...doc, originalName: meta?.originalName ?? doc.id };
-    });
+export function getCourseDocsWithNames(courseId: string): Document[] {
+    return getCourseDocsStmt.all(courseId) as Document[];
 }
 
 export function getDocument(id: string): Document | undefined {
@@ -80,20 +76,12 @@ export function getFileMetadata(id: string): FileMetadata | undefined {
     return getFileMetadataStmt.get(id) as FileMetadata | undefined;
 }
 
-export function getFileMetadataByUploadId(uploadId: string): FileMetadata | undefined {
-    return getFileMetadataByUploadIdStmt.get(uploadId) as FileMetadata | undefined;
-}
-
 export function getAllFileMetadataByUploadId(uploadId: string): FileMetadata[] {
     return getFileMetadataByUploadIdStmt.all(uploadId) as FileMetadata[];
 }
 
 export function getUpload(id: string): Upload | undefined {
     return getUploadStmt.get(id) as Upload | undefined;
-}
-
-export function updateUploadCourseId(uploadId: string, courseId: string): void {
-    updateUploadCourseIdStmt.run(courseId, uploadId);
 }
 
 export function updateUploadConsumed(uploadId: string): void {
@@ -128,6 +116,10 @@ export function getChatMessages(sessionId: string): ChatMessage[] {
 
 export function getQuizQuestions(sessionId: string): QuizQuestion[] {
     return getQuizQuestionsStmt.all(sessionId) as QuizQuestion[];
+}
+
+export function getClustersByCourseId(courseId: string): Cluster[] {
+    return getClustersByCourseIdStmt.all(courseId) as Cluster[];
 }
 
 export function getIndexNodes(documentId: string): IndexNode[] {
@@ -181,7 +173,7 @@ export function insertCourse(course: Course): void {
 }
 
 export function insertDocument(doc: Document): void {
-    insertDocumentStmt.run(doc.id, doc.courseId, doc.type, doc.status, doc.lastIndexed);
+    insertDocumentStmt.run(doc.id, doc.name, doc.courseId, doc.type, doc.status, doc.dateAdded);
 }
 
 export function insertSession(session: Session & { courseId?: string }): void {

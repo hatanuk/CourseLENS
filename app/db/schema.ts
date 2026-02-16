@@ -15,8 +15,7 @@ db.exec(`
       id TEXT PRIMARY KEY,
       sessionId TEXT NOT NULL,
       createdAt TEXT NOT NULL,
-      consumedAt TEXT,
-      courseId TEXT
+      consumedAt TEXT
     );
 
     CREATE TABLE IF NOT EXISTS fileMetadata (
@@ -30,10 +29,11 @@ db.exec(`
 
     CREATE TABLE IF NOT EXISTS documents (
       id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
       courseId TEXT,
-      type TEXT NOT NULL,
-      status TEXT DEFAULT 'pending',
-      lastIndexed TEXT,
+      type TEXT NOT NULL CHECK(type IN ('pdf', 'video', 'image', 'text')),
+      status TEXT DEFAULT 'processing' CHECK(status IN ('processing', 'processed', 'error')),
+      dateAdded TEXT,
       FOREIGN KEY (id) REFERENCES fileMetadata(id) ON DELETE CASCADE,
       FOREIGN KEY (courseId) REFERENCES courses(id) ON DELETE CASCADE
     );

@@ -44,7 +44,7 @@ export default function CourseClient({ course, docs, sessions, courseId }: Props
               href={`/course/${courseId}/doc/${doc.id}`}
               className={styles.docItem}
             >
-              <span className={styles.docTitle}>{doc.id}</span>
+              <span className={styles.docTitle}>{doc.name ?? doc.id}</span>
               <span
                 className={styles.statusBadge}
                 style={{ background: statusColors[doc.status] }}
@@ -67,7 +67,7 @@ export default function CourseClient({ course, docs, sessions, courseId }: Props
             <span className={styles.statLabel}>Indexed</span>
           </div>
           <div className={styles.stat}>
-           
+
             <span className={styles.statLabel}>Complete</span>
           </div>
         </div>

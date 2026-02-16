@@ -41,15 +41,16 @@ export default function DocumentWorkspaceClient({
   const courseDocs = allDocs[selectedCourse] ?? [];
 
   const filteredDocs = courseDocs.filter(d =>
-    d.id.toLowerCase().includes(searchTerm.toLowerCase())
+    (d.name ?? d.id).toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const statusColors: Record<string, string> = {
-    indexed: '#16a34a',
-    pending: '#9ca3af',
-    indexing: '#f59e0b',
-    error: '#dc2626',
-  };
+  function statusColors(status: string): string {
+    switch (status) {
+      default:
+        return "#16a34a"
+    }
+
+  }
 
   const handleToggleSection = (id: string) => {
     const newSet = new Set(selectedSections);
@@ -99,10 +100,10 @@ export default function DocumentWorkspaceClient({
               href={`/course/${selectedCourse}/doc/${d.id}`}
               className={`${styles.docItem} ${d.id === docId ? styles.active : ''}`}
             >
-              <span className={styles.docTitle}>{d.id}</span>
+              <span className={styles.docTitle}>{d.name}</span>
               <span
                 className={styles.statusBadge}
-                style={{ background: statusColors[d.status] }}
+                style={{ background: statusColors(d.status) }}
               >
                 {d.status}
               </span>
@@ -135,11 +136,8 @@ export default function DocumentWorkspaceClient({
       {/* Center Panel - Index + Preview */}
       <main className={styles.centerPanel}>
         <div className={styles.docHeader}>
-          <h1 className={styles.docTitle}>{doc.id}</h1>
+          <h1 className={styles.docTitle}>{doc.name ?? doc.id}</h1>
           <div className={styles.docActions}>
-            <button className={styles.actionBtn} onClick={handleReindex}>
-              Re-index
-            </button>
             <button className={styles.actionBtn}>Generate quiz from selection</button>
           </div>
         </div>
@@ -176,40 +174,12 @@ export default function DocumentWorkspaceClient({
           </div>
 
           <div className={styles.previewSection}>
-            <ContentTabs />
+            <ContentTabs docId={docId} />
           </div>
         </div>
       </main>
 
-      {/* Right Panel - Tools */}
-      <aside className={styles.rightPanel}>
-        <div className={styles.toolTabs}>
-          <button
-            className={`${styles.toolTab} ${toolTab === 'quiz' ? styles.toolTabActive : ''}`}
-            onClick={() => setToolTab('quiz')}
-          >
-            Quiz Builder
-          </button>
-          <button
-            className={`${styles.toolTab} ${toolTab === 'chat' ? styles.toolTabActive : ''}`}
-            onClick={() => setToolTab('chat')}
-          >
-            Chat
-          </button>
-          <button
-            className={`${styles.toolTab} ${toolTab === 'history' ? styles.toolTabActive : ''}`}
-            onClick={() => setToolTab('history')}
-          >
-            History
-          </button>
-        </div>
 
-        <div className={styles.toolContent}>
-          {toolTab === 'quiz' && <QuizPanel selectedSections={selectedSections} indexNodes={indexNodes} />}
-          {toolTab === 'chat' && <ChatPanel selectedSections={selectedSections} indexNodes={indexNodes} />}
-          {toolTab === 'history' && <HistoryPanel />}
-        </div>
-      </aside>
     </div>
   );
 }

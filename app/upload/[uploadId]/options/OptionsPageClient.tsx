@@ -7,37 +7,31 @@ import QuizPanel from '@/app/components/QuizPanel';
 import styles from '../UploadPage.module.css';
 
 interface OptionsPageClientProps {
-  uploadId: string;
-  courseId: string | null;
   courseName: string | null;
   files: FileMetadata[];
 }
 
-export default function OptionsPageClient({ uploadId, courseId, courseName, files }: OptionsPageClientProps) {
+export default function OptionsPageClient({ courseName, files }: OptionsPageClientProps) {
   const router = useRouter();
-  const [wantsGenerate, setWantsGenerate] = useState<boolean | null>(null);
+  const [wantsQuiz, setWantsQuiz] = useState(false);
 
-  function handleNo() {
-    router.replace('/courses');
-  }
-
-  if (wantsGenerate === null) {
+  if (!wantsQuiz) {
     return (
       <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Generate questions?</h2>
+        <h2 className={styles.sectionTitle}>All done!</h2>
         <p className={styles.emptyState} style={{ padding: '0 0 1rem' }}>
-          Would you like to generate quiz questions from the uploaded documents?
+          {courseName && `Documents saved to ${courseName}.`}
         </p>
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          <button className={styles.generateBtn} onClick={() => setWantsGenerate(true)}>
-            Yes
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          <button className={styles.generateBtn} onClick={() => setWantsQuiz(true)}>
+            Generate quiz questions
           </button>
           <button
             className={styles.segmentedBtn}
-            style={{ flex: 1, padding: '0.75rem 1.5rem', border: '1px solid #e0e0e0' }}
-            onClick={handleNo}
+            style={{ padding: '0.75rem 1.5rem', border: '1px solid #e0e0e0' }}
+            onClick={() => router.replace('/courses')}
           >
-            No, go to My Courses
+            Go to My Courses
           </button>
         </div>
       </section>
@@ -45,17 +39,12 @@ export default function OptionsPageClient({ uploadId, courseId, courseName, file
   }
 
   return (
-    <>
-      <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Generate questions</h2>
-        <p className={styles.emptyState} style={{ padding: '0 0 1rem' }}>
-          {courseName && `Generating from ${courseName}`}
-        </p>
-      </section>
+    <section className={styles.section}>
+      <h2 className={styles.sectionTitle}>Generate questions</h2>
       <QuizPanel
         selectedSections={new Set(files.map((f) => f.id))}
         indexNodes={files.map((f) => ({ id: f.id, title: f.originalName, level: 0 }))}
       />
-    </>
+    </section>
   );
 }

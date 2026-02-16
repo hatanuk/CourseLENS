@@ -4,11 +4,13 @@ import {
   getUpload,
   getCourse,
   getAllFileMetadataByUploadId,
-  updateUploadCourseId,
   updateDocumentsCourseId,
   updateClustersCourseIdByUpload,
+  insertDocument,
 } from "@/app/db/queries";
+import { fileMetadataToDocument } from "@/app/data/structures";
 import { setPayloadByDocumentIds } from "@/app/lib/qdrant";
+import type { Document } from "@/app/data/structures";
 
 export async function POST(
   request: Request,
@@ -40,10 +42,11 @@ export async function POST(
   const files = getAllFileMetadataByUploadId(uploadId);
   const fileIds = files.map((f) => f.id);
 
-  updateUploadCourseId(uploadId, courseId);
-  updateDocumentsCourseId(fileIds, courseId);
-  updateClustersCourseIdByUpload(uploadId, courseId);
-  await setPayloadByDocumentIds(fileIds, { course_id: courseId });
+
+
+  for (const file of files) {
+  insertDocument(fileMetadataToDocument(file, courseId, {status: "processing" }));
+}
 
   return NextResponse.json({ ok: true });
 }

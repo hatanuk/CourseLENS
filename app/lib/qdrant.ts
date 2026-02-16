@@ -4,11 +4,11 @@ const url = process.env.QDRANT_URL
 const apiKey = process.env.QDRANT_API_KEY
 
 export type QdrantPointPayload = {
-   course_id: string; 
-   document_id: string; 
-   chunk_index: number; 
-   cluster_id: string; 
-   text: string;
+  course_id: string;
+  document_id: string;
+  chunk_index: number;
+  cluster_id: string;
+  text: string;
 }
 
 
@@ -33,19 +33,21 @@ export async function ensureCollection(): Promise<void> {
       vectors: { size: VECTOR_SIZE, distance: "Cosine" },
     })
   }
-  await ensureDocumentIdIndex()
+  await ensurePayloadIndexes()
 }
 
-async function ensureDocumentIdIndex(): Promise<void> {
+async function ensurePayloadIndexes(): Promise<void> {
   if (!qdrant) return
-  try {
-    await qdrant.createPayloadIndex(COLLECTION, {
-      field_name: "document_id",
-      field_schema: "keyword",
-      wait: true,
-    })
-  } catch {
-    // Index may already exist
+  for (const field of ["document_id", "course_id", "cluster_id"]) {
+    try {
+      await qdrant.createPayloadIndex(COLLECTION, {
+        field_name: field,
+        field_schema: "keyword",
+        wait: true,
+      })
+    } catch {
+      // Index may already exist
+    }
   }
 }
 
@@ -57,6 +59,40 @@ export async function upsertPoints(points: QdrantPoint[]): Promise<void> {
     wait: true,
     points: points.map((p) => ({ id: p.id, vector: p.vector, payload: p.payload })),
   })
+}
+
+export async function getChunksByClusterIds(
+  courseId: string,
+  clusterIds: string[]
+): Promise<QdrantPointPayload[]> {
+  if (!qdrant || clusterIds.length === 0) return []
+  try {
+    await ensureCollection()
+  } catch {
+    return []
+  }
+  const payloads: QdrantPointPayload[] = []
+  let offset: string | number | undefined
+  while (true) {
+    const res = await qdrant.scroll(COLLECTION, {
+      filter: {
+        must: [
+          { key: "course_id", match: { value: courseId } },
+          { key: "cluster_id", match: { any: clusterIds } },
+        ],
+      },
+      limit: 500,
+      ...(offset !== undefined && { offset }),
+      with_payload: true,
+      with_vector: false,
+    })
+    for (const p of res.points) {
+      if (p.payload) payloads.push(p.payload as QdrantPointPayload)
+    }
+    if (res.points.length < 500) break
+    offset = res.points[res.points.length - 1].id
+  }
+  return payloads
 }
 
 export async function setPayloadByDocumentIds(documentIds: string[], payload: Partial<QdrantPointPayload>): Promise<void> {

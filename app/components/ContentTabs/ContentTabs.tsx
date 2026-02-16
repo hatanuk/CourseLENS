@@ -1,10 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styles from './ContentTabs.module.css';
 
-export default function ContentTabs() {
+interface ContentTabsProps {
+  docId: string;
+}
+
+export default function ContentTabs({ docId }: ContentTabsProps) {
   const [activeTab, setActiveTab] = useState<'preview' | 'keypoints' | 'figures'>('preview');
+  const [figures, setFigures] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetch(`/api/documents/${docId}/figures`)
+      .then((r) => r.json())
+      .then((d) => setFigures(d.figures ?? []))
+      .catch(() => setFigures([]));
+  }, [docId]);
 
   return (
     <div className={styles.container}>
@@ -46,13 +58,18 @@ export default function ContentTabs() {
           </div>
         )}
         {activeTab === 'figures' && (
-          <div className={styles.placeholder}>
-            <p>Figures and diagrams placeholder</p>
-            <div className={styles.figureGrid}>
-              <div className={styles.figurePlaceholder}>Fig 1.1</div>
-              <div className={styles.figurePlaceholder}>Fig 1.2</div>
-              <div className={styles.figurePlaceholder}>Fig 2.1</div>
-            </div>
+          <div className={styles.figuresContent}>
+            {figures.length === 0 ? (
+              <p className={styles.placeholder}>No figures extracted from this document.</p>
+            ) : (
+              <div className={styles.figureGrid}>
+                {figures.map((src, i) => (
+                  <div key={src} className={styles.figureWrap}>
+                    <img src={src} alt={`Figure ${i + 1}`} className={styles.figureImg} />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { JetBrains_Mono, Montserrat, Michroma, Outfit } from 'next/font/google';
+import AppShell from './components/AppShell';
 import './globals.css';
 
 const outfit = Outfit({
@@ -21,7 +22,7 @@ const michroma = Michroma({
 
 
 export const metadata: Metadata = {
-  title: 'Lens',
+  title: 'CourseLens',
   description: 'Document-centric study app with RAG',
 };
 
@@ -33,7 +34,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${outfit.variable} ${jetbrainsMono.variable} ${michroma.variable}`}>
-        {children}
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );

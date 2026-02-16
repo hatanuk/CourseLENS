@@ -1,42 +1,27 @@
 import { getSessionId } from "@/app/lib/sessionHandler";
 import { getUpload, getAllFileMetadataByUploadId, getAllCourses } from "@/app/db/queries";
-import { notFound, redirect } from "next/navigation"
-import AppShell from "@/app/components/AppShell";
-import { Suspense } from "react";
-import UploadPageWrapper from "./UploadPageWrapper";
-import styles from './UploadPage.module.css'
+import { notFound, redirect } from "next/navigation";
 import TopBar from "@/app/components/TopBar";
+import UploadPageWrapper from "./UploadPageWrapper";
+import styles from "./UploadPage.module.css";
 
-async function UploadContent({ uploadId }: { uploadId: string }) {
-    const sessionId = await getSessionId()
-    const upload = getUpload(uploadId)
+export default async function Page({ params }: { params: Promise<{ uploadId: string }> }) {
+    const { uploadId } = await params;
+    const sessionId = await getSessionId();
+    if (!sessionId) redirect("/");
 
-    if (!sessionId) {
-        redirect("/")
-    }
-
-    if (!upload || upload.sessionId !== sessionId) {
-        notFound()
-    }
+    const upload = getUpload(uploadId);
+    if (!upload || upload.sessionId !== sessionId) notFound();
 
     const files = getAllFileMetadataByUploadId(uploadId);
     const courses = getAllCourses(sessionId);
 
     return (
-        <UploadPageWrapper files={files} uploadId={uploadId} courses={courses} consumedAt={upload.consumedAt} />
-    );
-}
-
-export default async function Page({ params }: { params: Promise<{ uploadId: string }> }) {
-    const { uploadId } = await params;
-    return (
-        <AppShell>
+        <>
             <TopBar />
             <div className={styles.container}>
-                <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>Loading upload...</div>}>
-                    <UploadContent uploadId={uploadId} />
-                </Suspense>
+                <UploadPageWrapper files={files} uploadId={uploadId} courses={courses} consumedAt={upload.consumedAt} />
             </div>
-        </AppShell>
+        </>
     );
 }

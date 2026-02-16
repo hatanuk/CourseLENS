@@ -1,4 +1,5 @@
 import { getAllCourses, getCourse, getCourseDocs, getDocument, getIndexNodes } from '@/app/db/queries';
+import { getSessionId } from '@/app/lib/sessionHandler';
 import DocumentWorkspaceClient from './DocumentWorkspaceClient';
 
 interface PageProps {
@@ -7,8 +8,9 @@ interface PageProps {
 
 export default async function DocumentWorkspacePage({ params }: PageProps) {
   const { courseId, docId } = await params;
+  const sessionId = await getSessionId();
 
-  const courses = getAllCourses();
+  const courses = sessionId ? getAllCourses(sessionId) : [];
   const course = getCourse(courseId);
   const doc = getDocument(docId);
   

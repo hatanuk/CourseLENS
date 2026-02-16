@@ -1,3 +1,49 @@
+.toggleBtn {
+  margin-left: auto;
+  padding: 0.25rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggleBtn:hover {
+  color: #333;
+}
+
+.name {
+  display: flex;
+  align-items: center;
+}
+
+.courseFiles {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 300ms ease;
+  margin: 0 -1rem;
+  padding: 0 1rem 0 2.25rem;
+  list-style: square;
+}
+
+
+.courseFiles.open {
+  max-height: 500px;
+}
+
+.fileItem {
+  padding-top: 0.75rem;
+  margin-top: 0.5rem;
+  margin-left: -2.25rem;
+  margin-right: -1rem;
+  padding-left: 2.25rem;
+  padding-right: 1rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+
 .courseList {
   display: flex;
   flex-direction: column;
@@ -30,16 +76,8 @@
 }
 
 .name {
+  margin-bottom: 0.25rem;
   font-weight: 500;
-  margin-bottom: 0.5rem;
-}
-
-.meta {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.8rem;
-  color: #666;
-  margin-bottom: 0.5rem;
 }
 
 .progress {

@@ -34,12 +34,12 @@
 }
 
 .sessionTitle {
-  font-size: 0.85rem;
+  font-size: 1rem;
   font-weight: 500;
 }
 
 .sessionDate {
-  font-size: 0.7rem;
+  font-size: 1rem;
   color: #999;
 }
 
@@ -48,7 +48,7 @@
   background: #e5e5e5;
   border: none;
   border-radius: 4px;
-  font-size: 0.75rem;
+  font-size: 1rem;
   cursor: pointer;
 }
 

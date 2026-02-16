@@ -16,7 +16,7 @@
 
 .label {
   display: block;
-  font-size: 0.75rem;
+  font-size: 1rem;
   font-weight: 500;
   color: #666;
   margin-bottom: 0.35rem;
@@ -37,12 +37,12 @@
   background: #4a4a6a;
   color: #fff;
   border-radius: 3px;
-  font-size: 0.7rem;
+  font-size: 1rem;
 }
 
 .hint {
   color: #999;
-  font-size: 0.75rem;
+  font-size: 1rem;
 }
 
 .select,
@@ -51,7 +51,7 @@
   padding: 0.4rem;
   border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 0.85rem;
+  font-size: 1rem;
 }
 
 .generateBtn {
@@ -61,7 +61,7 @@
   color: #fff;
   border: none;
   border-radius: 4px;
-  font-size: 0.875rem;
+  font-size: 1rem;
   cursor: pointer;
   margin-top: 0.5rem;
 }
@@ -75,7 +75,7 @@
 }
 
 .subheading {
-  font-size: 0.85rem;
+  font-size: 1rem;
   font-weight: 500;
   margin-bottom: 0.75rem;
 }
@@ -88,7 +88,7 @@
   background: #f9f9f9;
   border-radius: 4px;
   margin-bottom: 0.5rem;
-  font-size: 0.8rem;
+  font-size: 1rem;
 }
 
 .qNumber {
@@ -104,6 +104,6 @@
   padding: 0.1rem 0.4rem;
   background: #e0e0e0;
   border-radius: 3px;
-  font-size: 0.65rem;
+  font-size: 1rem;
   text-transform: uppercase;
 }
