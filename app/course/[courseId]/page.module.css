@@ -125,6 +125,24 @@
   background: #fff;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.sessionCard:hover {
+  border-color: #4a4a6a;
+  background: #f8f8ff;
+}
+
+.seeMore {
+  font-size: 0.9rem;
+  color: #4a4a6a;
+  text-decoration: none;
+}
+
+.seeMore:hover {
+  text-decoration: underline;
 }
 
 .sessionIcon {

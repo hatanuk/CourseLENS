@@ -1,13 +1,13 @@
 'use client';
 
-import type { Session } from '@/app/data/structures';
+import type { Interaction } from '@/app/data/structures';
 import styles from './HistoryPanel.module.css';
 
 interface HistoryPanelProps {
-  sessions?: Session[];
+  sessions?: Interaction[];
 }
 
-const defaultSessions: Session[] = [
+const defaultSessions: Interaction[] = [
   { id: 's1', title: 'Quiz: Chapter 1 Review', date: '2024-01-15', type: 'quiz' },
   { id: 's2', title: 'Chat: Recursion concepts', date: '2024-01-14', type: 'chat' },
   { id: 's3', title: 'Quiz: Data Structures', date: '2024-01-12', type: 'quiz' },

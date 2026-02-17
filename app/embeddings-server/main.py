@@ -1,40 +1,84 @@
-from fastapi import FastAPI
+from langchain_core.messages import AIMessage, ToolMessage
 from pydantic import BaseModel
-from sentence_transformers import SentenceTransformer
 from typing import Any, List
 import hdbscan
 import umap
 import numpy as np
+import os
+from setup import app, chat_model, agent, vector_store, embedding_model
+from tools import course_id_var
 
 MIN_CLUSTER_SIZE = 5
 MAX_CLUSTER_SIZE = 300
 
-app = FastAPI()
-
-model = SentenceTransformer("sentence-transformers/all-mpnet-base-v2")
-
-
 class EmbedRequest(BaseModel):
     chunks: List[str]
+
+class ChatMessage(BaseModel):
+    role: str
+    content: str
+
+class ChatRequest(BaseModel):
+    content: str
+    messages: list[ChatMessage] = []
+    course_id: str | None = None
+
+
+@app.post("/chat")
+def chat(request: ChatRequest):
+    content = request.content
+    course_id_var.set(request.course_id)
+    tool_calls_log = []
+    pending_calls = {}
+    response = None
+
+    # Build message history: prior context (max 100) + new user message
+    history = [{"role": m.role, "content": m.content} for m in request.messages[-100:]]
+    history.append({"role": "user", "content": content})
+
+    for step in agent.stream({"messages": history}, stream_mode="values"):
+        last = step["messages"][-1]
+
+        # collect tool usage
+        if hasattr(last, "tool_calls") and last.tool_calls:
+            for call in last.tool_calls:
+                pending_calls[call["id"]] = {
+                    "tool_name": call["name"],
+                    "args": call["args"],
+                    "result": None
+                }
+
+        if isinstance(last, ToolMessage):
+            call_id = last.tool_call_id
+            if call_id in pending_calls:
+                pending_calls[call_id]["result"] = last.content
+                tool_calls_log.append(pending_calls.pop(call_id))
+
+        if isinstance(last, AIMessage) and not last.tool_calls:
+            response = last.content
+
+    return {
+        "response": response,
+        "tool_log": tool_calls_log
+    }
 
 
 @app.post("/embed")
 def embed(request: EmbedRequest):
 
     # Embedding
-    embeddings = model.encode(
-        request.chunks,
-        normalize_embeddings=True,
+    vectors = embedding_model.embed_documents(
+        request.chunks
     )
-    embeddings = np.array(embeddings)
+    vectors = np.array(vectors)
 
     # Reduction: skip UMAP when too few points (UMAP needs n_neighbors < n_samples)
     min_for_umap = 15
-    if len(embeddings) <= min_for_umap:
-        reduced = embeddings
+    if len(vectors) <= min_for_umap:
+        reduced = vectors
     else:
-        n_neighbors = min(15, len(embeddings) - 1)
-        n_components = min(5, len(embeddings) - 1)
+        n_neighbors = min(15, len(vectors) - 1)
+        n_components = min(5, len(vectors) - 1)
         reducer = umap.UMAP(
             n_components=n_components,
             n_neighbors=n_neighbors,
@@ -42,14 +86,14 @@ def embed(request: EmbedRequest):
             metric="cosine",
             random_state=42,
         )
-        reduced = reducer.fit_transform(embeddings)
+        reduced = reducer.fit_transform(vectors)
 
     # Clustering
-    clusters = cluster_recursive(reduced, list(range(len(embeddings))))
+    clusters = cluster_recursive(reduced, list(range(len(vectors))))
 
 
     return {
-        "embeddings": embeddings.tolist(),
+        "embeddings": vectors.tolist(),
         "clusters": clusters,
     }
 

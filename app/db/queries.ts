@@ -1,5 +1,5 @@
 import { db } from "./schema";
-import type { Course, Document, FileMetadata, IndexNode, QuizQuestion, ChatMessage, Session, Upload, Cluster } from '../data/structures';
+import type { Course, Document, FileMetadata, IndexNode, QuizQuestion, ChatMessage, Upload, Cluster, Interaction } from '../data/structures';
 
 // === Fetch Statements ===
 const getAllCoursesStmt = db.prepare("SELECT * FROM courses WHERE sessionId = ?");
@@ -10,14 +10,15 @@ const getDocumentStmt = db.prepare("SELECT * FROM documents WHERE id = ?");
 const getFileMetadataStmt = db.prepare("SELECT * FROM fileMetadata WHERE id = ?");
 const getFileMetadataByUploadIdStmt = db.prepare("SELECT * FROM fileMetadata WHERE uploadId = ?");
 const getUploadStmt = db.prepare("SELECT * FROM uploads WHERE id = ?");
-const updateUploadConsumedStmt = db.prepare("UPDATE uploads SET consumedAt = ? WHERE id = ?");
-const updateDocumentCourseIdStmt = db.prepare("UPDATE documents SET courseId = ? WHERE id = ?");
-const updateClustersCourseIdByUploadStmt = db.prepare("UPDATE clusters SET courseId = ? WHERE uploadId = ?");
 const getUploadsBySessionIdStmt = db.prepare("SELECT * FROM uploads WHERE sessionId = ? ORDER BY createdAt DESC");
-const getAllSessionsStmt = db.prepare("SELECT * FROM sessions ORDER BY date DESC");
-const getSessionsByCourseStmt = db.prepare("SELECT * FROM sessions WHERE courseId = ? ORDER BY date DESC");
-const getChatMessagesStmt = db.prepare("SELECT * FROM chatMessages WHERE sessionId = ? ORDER BY createdAt");
-const getQuizQuestionsStmt = db.prepare("SELECT * FROM quizQuestions WHERE sessionId = ?");
+const getAllInteractionsStmt = db.prepare("SELECT * FROM interactions ORDER BY date DESC");
+const getInteractionByIdStmt = db.prepare("SELECT * FROM interactions WHERE id = ?");
+const getInteractionsByCourseStmt = db.prepare("SELECT * FROM interactions WHERE courseId = ? ORDER BY date DESC");
+const getTotalQuestionsByCourseStmt = db.prepare(
+  "SELECT COUNT(*) as count FROM quizQuestions q JOIN interactions i ON q.interactionId = i.id WHERE i.courseId = ?"
+);
+const getChatMessagesStmt = db.prepare("SELECT * FROM chatMessages WHERE interactionId = ? ORDER BY sentAt");
+const getQuizQuestionsStmt = db.prepare("SELECT * FROM quizQuestions WHERE interactionId = ?");
 const getIndexNodesStmt = db.prepare("SELECT * FROM indexNodes WHERE documentId = ? ORDER BY sortOrder");
 const getClustersByCourseIdStmt = db.prepare("SELECT * FROM clusters WHERE courseId = ? ORDER BY topic");
 
@@ -34,11 +35,11 @@ const insertFileMetadataStmt = db.prepare(
 const insertDocumentStmt = db.prepare(
     "INSERT OR REPLACE INTO documents (id, name, courseId, type, status, dateAdded) VALUES (?, ?, ?, ?, ?, ?)"
 );
-const insertSessionStmt = db.prepare(
-    "INSERT OR REPLACE INTO sessions (id, title, type, courseId, date) VALUES (?, ?, ?, ?, ?)"
+const insertInteractionStmt = db.prepare(
+    "INSERT OR REPLACE INTO interactions (id, title, type, courseId, date) VALUES (?, ?, ?, ?, ?)"
 );
 const insertChatMessageStmt = db.prepare(
-    "INSERT INTO chatMessages (id, sessionId, role, content) VALUES (?, ?, ?, ?)"
+    "INSERT INTO chatMessages (id, interactionId, role, content, sentAt) VALUES (?, ?, ?, ?, ?)"
 );
 const insertIndexNodeStmt = db.prepare(
     "INSERT OR REPLACE INTO indexNodes (id, documentId, parentId, title, level, sortOrder) VALUES (?, ?, ?, ?, ?, ?)"
@@ -46,6 +47,12 @@ const insertIndexNodeStmt = db.prepare(
 const insertClusterStmt = db.prepare(
     "INSERT OR REPLACE INTO clusters (id, uploadId, courseId, topic, summary) VALUES (?, ?, ?, ?, ?)"
 );
+
+// === Update Statement ===
+const updateUploadConsumedStmt = db.prepare("UPDATE uploads SET consumedAt = ? WHERE id = ?");
+const updateDocumentCourseIdStmt = db.prepare("UPDATE documents SET courseId = ? WHERE id = ?");
+const updateClustersCourseIdByUploadStmt = db.prepare("UPDATE clusters SET courseId = ? WHERE uploadId = ?");
+const updateInteractionTitleStmt = db.prepare("UPDATE interactions SET title = ? WHERE id = ?")
 
 // === Query Functions ===
 export function getAllCourses(sessionId: string): Course[] {
@@ -102,20 +109,29 @@ export function getUploadsBySessionId(sessionId: string): Upload[] {
     return getUploadsBySessionIdStmt.all(sessionId) as Upload[];
 }
 
-export function getAllSessions(): Session[] {
-    return getAllSessionsStmt.all() as Session[];
+export function getAllInteractions(): Interaction[] {
+    return getAllInteractionsStmt.all() as Interaction[];
 }
 
-export function getSessionsByCourse(courseId: string): Session[] {
-    return getSessionsByCourseStmt.all(courseId) as Session[];
+export function getInteractionById(id: string): (Interaction  & { courseId?: string }) | undefined {
+    return getInteractionByIdStmt.get(id) as (Interaction & { courseId?: string }) | undefined;
 }
 
-export function getChatMessages(sessionId: string): ChatMessage[] {
-    return getChatMessagesStmt.all(sessionId) as ChatMessage[];
+export function getInteractionsByCourse(courseId: string): Interaction[] {
+    return getInteractionsByCourseStmt.all(courseId) as Interaction[];
 }
 
-export function getQuizQuestions(sessionId: string): QuizQuestion[] {
-    return getQuizQuestionsStmt.all(sessionId) as QuizQuestion[];
+export function getTotalQuestionsByCourse(courseId: string): number {
+    const row = getTotalQuestionsByCourseStmt.get(courseId) as { count: number } | undefined;
+    return row?.count ?? 0;
+}
+
+export function getChatMessages(interactionId: string): ChatMessage[] {
+    return getChatMessagesStmt.all(interactionId) as ChatMessage[];
+}
+
+export function getQuizQuestions(interactionId: string): QuizQuestion[] {
+    return getQuizQuestionsStmt.all(interactionId) as QuizQuestion[];
 }
 
 export function getClustersByCourseId(courseId: string): Cluster[] {
@@ -160,6 +176,10 @@ function buildTree(rows: Array<{ id: string; parentId: string | null; title: str
 
 // === Insert Functions ===
 
+export function updateInteractionTitle(interactionId: string, title: string): void {
+    updateInteractionTitleStmt.run(interactionId, title)
+}
+
 export function insertUpload(upload: Omit<Upload, "createdAt" | "consumedAt">): void {
     insertUploadStmt.run(upload.id, upload.sessionId, new Date().toISOString(), null);
 }
@@ -176,12 +196,12 @@ export function insertDocument(doc: Document): void {
     insertDocumentStmt.run(doc.id, doc.name, doc.courseId, doc.type, doc.status, doc.dateAdded);
 }
 
-export function insertSession(session: Session & { courseId?: string }): void {
-    insertSessionStmt.run(session.id, session.title, session.type, session.courseId ?? null, session.date);
+export function insertInteraction(interaction: Interaction & { courseId?: string }): void {
+    insertInteractionStmt.run(interaction.id, interaction.title, interaction.type, interaction.courseId ?? null, interaction.date);
 }
 
-export function insertChatMessage(sessionId: string, msg: ChatMessage): void {
-    insertChatMessageStmt.run(msg.id, sessionId, msg.role, msg.content);
+export function insertChatMessage(msg: ChatMessage): void {
+    insertChatMessageStmt.run(msg.id, msg.interactionId, msg.role, msg.content, msg.sentAt ?? new Date().toISOString());
 }
 
 export function insertCluster(cluster: Cluster): void {

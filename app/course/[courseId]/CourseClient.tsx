@@ -2,13 +2,13 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import type { Course, Document, Session } from '@/app/data/structures';
+import type { Course, Document, Interaction } from '@/app/data/structures';
 import styles from './page.module.css';
 
 interface Props {
   course: Course;
   docs: Document[];
-  sessions: Session[];
+  sessions: Interaction[];
   courseId: string;
 }
 
@@ -76,7 +76,7 @@ export default function CourseClient({ course, docs, sessions, courseId }: Props
           <h2 className={styles.sectionTitle}>Recent Sessions</h2>
           <div className={styles.sessions}>
             {sessions.length > 0 ? (
-              sessions.map(session => (
+              sessions.slice(0, 2).map(session => (
                 <div key={session.id} className={styles.sessionCard}>
                   <span className={styles.sessionIcon}>
                     {session.type === 'quiz' ? '📝' : '💬'}
@@ -90,6 +90,7 @@ export default function CourseClient({ course, docs, sessions, courseId }: Props
             ) : (
               <p style={{ color: '#999', fontSize: '0.9rem' }}>No sessions yet</p>
             )}
+            {sessions.length > 2 && <p>See more</p>}
           </div>
         </section>
       </main>

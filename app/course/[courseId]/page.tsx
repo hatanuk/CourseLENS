@@ -1,4 +1,4 @@
-import { getCourse, getCourseDocs, getSessionsByCourse } from '@/app/db/queries';
+import { getCourse, getCourseDocs, getInteractionsByCourse } from '@/app/db/queries';
 import CourseClient from './CourseClient';
 
 interface PageProps {
@@ -10,7 +10,7 @@ export default async function CoursePage({ params }: PageProps) {
   
   const course = getCourse(courseId);
   const docs = getCourseDocs(courseId);
-  const sessions = getSessionsByCourse(courseId);
+  const sessions = getInteractionsByCourse(courseId);
 
   if (!course) {
     return <div style={{ padding: '2rem', textAlign: 'center', color: '#dc2626' }}>Course not found</div>;

@@ -1,4 +1,4 @@
-import { getAllCourses, getClustersByCourseId, getCourseDocs, getDocument } from '../db/queries';
+import { getAllCourses, getClustersByCourseId, getCourseDocs, getDocument, getInteractionsByCourse, getTotalQuestionsByCourse } from '../db/queries';
 import { getChunksByClusterIds } from '../lib/qdrant';
 import CoursesClient from './CoursesClient';
 import { getSessionId } from '../lib/sessionHandler';
@@ -64,16 +64,26 @@ export default async function CoursesPage() {
   }
 
   const courseDocuments: Record<string, Document[]> = {}
+  const interactionsByCourse: Record<string, Awaited<ReturnType<typeof getInteractionsByCourse>>> = {}
+  const totalQuestionsByCourse: Record<string, number> = {}
   if (sessionId) {
-    for (let course of courses) {
-       courseDocuments[course.id] = getCourseDocs(course.id)
+    for (const course of courses) {
+      courseDocuments[course.id] = getCourseDocs(course.id)
+      interactionsByCourse[course.id] = getInteractionsByCourse(course.id)
+      totalQuestionsByCourse[course.id] = getTotalQuestionsByCourse(course.id)
     }
   }
 
   return (
     <>
       <TopBar />
-      <CoursesClient courses={courses} courseDocs={courseDocuments} allTopics={allTopics} />
+      <CoursesClient
+        courses={courses}
+        courseDocs={courseDocuments}
+        allTopics={allTopics}
+        interactionsByCourse={interactionsByCourse}
+        totalQuestionsByCourse={totalQuestionsByCourse}
+      />
     </>
   );
 }

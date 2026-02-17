@@ -20,7 +20,7 @@ export interface Document {
   id: string; // maps to FileMetadata.id
   name?: string; // filename, set from FileMetadata.originalName when saving
   courseId: string | null;
-  type: 'pdf' | 'video' | 'image'| 'text';
+  type: 'pdf' | 'video' | 'image' | 'text';
   status: 'processing' | 'processed' | 'error';
   dateAdded: string | null;
 }
@@ -38,15 +38,25 @@ export interface QuizQuestion {
   type: 'mcq' | 'short' | 'tf';
 }
 
-export interface ChatMessage {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
+export interface ToolUsage {
+  tool_name: string;
+  args: Record<string, unknown>;
+  result?: string;
 }
 
-export interface Session {
+export interface ChatMessage {
   id: string;
-  title: string;
+  sentAt: string;
+  interactionId: string;
+  role: 'user' | 'assistant';
+  content: string;
+  toolUsage?: ToolUsage[];
+}
+
+export interface Interaction {
+  id: string;
+  title: string | null;
+  courseId: string;
   date: string;
   type: 'quiz' | 'chat';
 }

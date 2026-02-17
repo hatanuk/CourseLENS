@@ -38,7 +38,8 @@ export async function ensureCollection(): Promise<void> {
 
 async function ensurePayloadIndexes(): Promise<void> {
   if (!qdrant) return
-  for (const field of ["document_id", "course_id", "cluster_id"]) {
+  const keywordFields = ["document_id", "course_id", "cluster_id"]
+  for (const field of keywordFields) {
     try {
       await qdrant.createPayloadIndex(COLLECTION, {
         field_name: field,
@@ -46,8 +47,17 @@ async function ensurePayloadIndexes(): Promise<void> {
         wait: true,
       })
     } catch {
-      // Index may already exist
+      /* index may already exist */
     }
+  }
+  try {
+    await qdrant.createPayloadIndex(COLLECTION, {
+      field_name: "chunk_index",
+      field_schema: "integer",
+      wait: true,
+    })
+  } catch {
+    /* index may already exist */
   }
 }
 

@@ -48,32 +48,32 @@ db.exec(`
       FOREIGN KEY (documentId) REFERENCES documents(id) ON DELETE CASCADE
     );
 
-    CREATE TABLE IF NOT EXISTS sessions (
+    CREATE TABLE IF NOT EXISTS interactions (
       id TEXT PRIMARY KEY,
       title TEXT,
       type TEXT CHECK(type IN ('quiz', 'chat')),
       courseId TEXT,
-      date TEXT DEFAULT CURRENT_TIMESTAMP,
+      date TEXT,
       FOREIGN KEY (courseId) REFERENCES courses(id) ON DELETE CASCADE
     );
 
     CREATE TABLE IF NOT EXISTS quizQuestions (
       id TEXT PRIMARY KEY,
-      sessionId TEXT,
+      interactionId TEXT,
       question TEXT NOT NULL,
       type TEXT CHECK(type IN ('mcq', 'short', 'tf')),
       source TEXT,
       extra TEXT,
-      FOREIGN KEY (sessionId) REFERENCES sessions(id) ON DELETE CASCADE
+      FOREIGN KEY (interactionId) REFERENCES interactions(id) ON DELETE CASCADE
     );
 
     CREATE TABLE IF NOT EXISTS chatMessages (
       id TEXT PRIMARY KEY,
-      sessionId TEXT NOT NULL,
+      interactionId TEXT NOT NULL,
       role TEXT CHECK(role IN ('user', 'assistant')),
       content TEXT NOT NULL,
-      createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (sessionId) REFERENCES sessions(id) ON DELETE CASCADE
+      sentAt TEXT DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (interactionId) REFERENCES interactions(id) ON DELETE CASCADE
     );
 
     CREATE TABLE IF NOT EXISTS clusters (
@@ -85,3 +85,4 @@ db.exec(`
       FOREIGN KEY (courseId) REFERENCES courses(id) ON DELETE CASCADE
     );
 `);
+
