@@ -11,11 +11,33 @@ interface CourseListProps {
   selectedId: string | null;
   onSelect: (id: string) => void;
   courseDocs: Record<string, Document[]>;
+  onCourseCreated?: () => void;
 }
 
-export default function CourseList({ courses, selectedId, onSelect, courseDocs }: CourseListProps) {
+export default function CourseList({ courses, selectedId, onSelect, courseDocs, onCourseCreated }: CourseListProps) {
 
   const [cardsOpened, setCardsOpened] = useState<string[]>([])
+  const [isCreating, setIsCreating] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [createError, setCreateError] = useState<string | null>(null);
+
+  async function handleCreate() {
+    if (!newName.trim()) return;
+    setCreateError(null);
+    const res = await fetch('/api/courses', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: newName.trim() }),
+    });
+    const data = await res.json();
+    if (data.ok && data.course) {
+      setNewName('');
+      setIsCreating(false);
+      onCourseCreated?.();
+    } else {
+      setCreateError(data.error ?? 'Failed to create course');
+    }
+  }
 
   function handleSelect(courseId: string) {
     onSelect(courseId)
@@ -30,10 +52,41 @@ export default function CourseList({ courses, selectedId, onSelect, courseDocs }
   return (
     <div className={styles.courseList}>
       <h2 className={styles.heading}>Courses</h2>
+      {isCreating ? (
+        <div className={styles.createForm}>
+          <input
+            type="text"
+            className={styles.createInput}
+            placeholder="Course name"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
+            autoFocus
+          />
+          {createError && <p className={styles.createError}>{createError}</p>}
+          <div className={styles.createActions}>
+            <button type="button" className={styles.createBtn} onClick={handleCreate} disabled={!newName.trim()}>
+              Create
+            </button>
+            <button
+              type="button"
+              className={styles.cancelBtn}
+              onClick={() => { setIsCreating(false); setNewName(''); setCreateError(null); }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button type="button" className={styles.newCourseBtn} onClick={() => setIsCreating(true)}>
+          <Plus size={18} />
+          Create new course
+        </button>
+      )}
       {courses.map(course => (
         <div
           key={course.id}
-          className={`${styles.card} ${selectedId === course.id ? styles.selected : ''}`}
+          className={`${styles.card} ${selectedId === course.id ? styles.selected : ''} ${cardsOpened.includes(course.id) && (courseDocs[course.id]?.length ?? 0) > 0 ? styles.expanded : ''}`}
           onClick={() => handleSelect(course.id)}
         >
 

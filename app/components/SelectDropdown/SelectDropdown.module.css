@@ -1,0 +1,113 @@
+.wrap {
+  position: relative;
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--input-padding);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  color: var(--color-text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.trigger:hover {
+  border-color: var(--color-primary);
+}
+
+.trigger:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.trigger:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.panel {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-height: 240px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.actionBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.85rem;
+  color: var(--color-primary);
+  cursor: pointer;
+}
+
+.actionBtn:hover {
+  text-decoration: underline;
+}
+
+.list {
+  overflow-y: auto;
+  padding: 0.25rem 0;
+  margin: 0;
+  list-style: none;
+}
+
+.checkSlot {
+  width: 20px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem 0.9rem;
+  border: none;
+  background: none;
+  font-size: 1rem;
+  text-align: left;
+  cursor: pointer;
+  color: var(--color-text);
+}
+
+.item:hover {
+  background: var(--color-bg-alt);
+}
+
+.itemSelected {
+  background: var(--color-selected);
+}
+
+.itemSelected:hover {
+  background: rgba(74, 74, 106, 0.12);
+}

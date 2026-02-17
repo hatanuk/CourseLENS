@@ -36,12 +36,27 @@ export interface QuizQuestion {
   id: string;
   question: string;
   type: 'mcq' | 'short' | 'tf';
+  source?: string | null;
+  extra?: string | null;
 }
 
 export interface ToolUsage {
   tool_name: string;
   args: Record<string, unknown>;
   result?: string;
+  artifact?: GeneratedQuestionSet;
+}
+
+export interface GeneratedQuestion {
+  text: string;
+  options?: string[];
+  correct?: number | boolean;
+}
+
+export interface GeneratedQuestionSet {
+  question_type: string;
+  topic?: string;
+  questions: GeneratedQuestion[];
 }
 
 export interface ChatMessage {

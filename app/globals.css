@@ -8,14 +8,34 @@
   --font-sans: var(--font-sans), system-ui, sans-serif;
   --font-mono: var(--font-mono), monospace;
   --font-logo: var(--font-logo), monospace;
+
+  /* Design tokens for consistency */
+  --color-border: #e0e0e0;
+  --color-border-light: #ddd;
+  --color-primary: #4a4a6a;
+  --color-primary-hover: #5a5a8a;
+  --color-success: #16a34a;
+  --color-success-light: #22c55e;
+  --color-error: #dc2626;
+  --color-text: #333;
+  --color-text-muted: #666;
+  --color-text-hint: #999;
+  --color-bg: #f5f5f5;
+  --color-bg-alt: #f8f8f8;
+  --color-bg-card: #fff;
+  --color-selected: #f8f8ff;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --input-padding: 0.5rem 0.75rem;
 }
 
 html,
 body {
   height: 100%;
   font-family: var(--font-sans);
-  background: #f5f5f5;
-  color: #333;
+  background: var(--color-bg);
+  color: var(--color-text);
 }
 
 a {
@@ -31,3 +51,4 @@ input,
 select {
   font-family: inherit;
 }
+

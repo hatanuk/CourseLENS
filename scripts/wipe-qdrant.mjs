@@ -1,4 +1,10 @@
+import { config } from "dotenv"
+import { fileURLToPath } from "url"
+import { dirname, join } from "path"
 import { QdrantClient } from "@qdrant/js-client-rest"
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+config({ path: join(__dirname, "..", ".env") })
 
 const url = process.env.QDRANT_URL
 const apiKey = process.env.QDRANT_API_KEY

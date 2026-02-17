@@ -1,5 +1,5 @@
 import { db } from "./schema";
-import type { Course, Document, FileMetadata, IndexNode, QuizQuestion, ChatMessage, Upload, Cluster, Interaction } from '../data/structures';
+import type { Course, Document, FileMetadata, IndexNode, QuizQuestion, ChatMessage, Upload, Cluster, Interaction, GeneratedQuestionSet, GeneratedQuestion } from '../data/structures';
 
 // === Fetch Statements ===
 const getAllCoursesStmt = db.prepare("SELECT * FROM courses WHERE sessionId = ?");
@@ -39,13 +39,16 @@ const insertInteractionStmt = db.prepare(
     "INSERT OR REPLACE INTO interactions (id, title, type, courseId, date) VALUES (?, ?, ?, ?, ?)"
 );
 const insertChatMessageStmt = db.prepare(
-    "INSERT INTO chatMessages (id, interactionId, role, content, sentAt) VALUES (?, ?, ?, ?, ?)"
+    "INSERT INTO chatMessages (id, interactionId, role, content, sentAt, toolUsage) VALUES (?, ?, ?, ?, ?, ?)"
 );
 const insertIndexNodeStmt = db.prepare(
     "INSERT OR REPLACE INTO indexNodes (id, documentId, parentId, title, level, sortOrder) VALUES (?, ?, ?, ?, ?, ?)"
 );
 const insertClusterStmt = db.prepare(
     "INSERT OR REPLACE INTO clusters (id, uploadId, courseId, topic, summary) VALUES (?, ?, ?, ?, ?)"
+);
+const insertQuizQuestionStmt = db.prepare(
+    "INSERT INTO quizQuestions (id, interactionId, question, type, source, extra) VALUES (?, ?, ?, ?, ?, ?)"
 );
 
 // === Update Statement ===
@@ -127,11 +130,39 @@ export function getTotalQuestionsByCourse(courseId: string): number {
 }
 
 export function getChatMessages(interactionId: string): ChatMessage[] {
-    return getChatMessagesStmt.all(interactionId) as ChatMessage[];
+    const rows = getChatMessagesStmt.all(interactionId) as Array<ChatMessage & { toolUsage?: string | null }>;
+    return rows.map((r) => {
+        const { toolUsage: raw, ...rest } = r;
+        const toolUsage = raw ? (() => { try { return JSON.parse(raw) as ChatMessage['toolUsage']; } catch { return undefined; } })() : undefined;
+        return { ...rest, toolUsage };
+    });
 }
 
 export function getQuizQuestions(interactionId: string): QuizQuestion[] {
     return getQuizQuestionsStmt.all(interactionId) as QuizQuestion[];
+}
+
+export function getChatGeneratedQuestions(interactionId: string): GeneratedQuestionSet[] {
+    const rows = getQuizQuestionsStmt.all(interactionId) as Array<QuizQuestion & { source?: string; extra?: string }>;
+    if (rows.length === 0) return [];
+    const set: GeneratedQuestionSet = {
+        question_type: rows[0].type === 'mcq' ? 'multiple_choice' : rows[0].type === 'tf' ? 'true_false' : 'multiple_choice',
+        topic: rows[0].source ?? undefined,
+        questions: rows.map((r) => {
+            const q: GeneratedQuestion = { text: r.question };
+            if (r.extra) {
+                try {
+                    const ex = JSON.parse(r.extra) as { options?: string[]; correct?: number | boolean };
+                    if (ex.options) q.options = ex.options;
+                    if (ex.correct !== undefined) q.correct = ex.correct;
+                } catch {
+                    /* ignore */
+                }
+            }
+            return q;
+        }),
+    };
+    return [set];
 }
 
 export function getClustersByCourseId(courseId: string): Cluster[] {
@@ -201,11 +232,16 @@ export function insertInteraction(interaction: Interaction & { courseId?: string
 }
 
 export function insertChatMessage(msg: ChatMessage): void {
-    insertChatMessageStmt.run(msg.id, msg.interactionId, msg.role, msg.content, msg.sentAt ?? new Date().toISOString());
+    const toolUsageJson = msg.toolUsage ? JSON.stringify(msg.toolUsage) : null;
+    insertChatMessageStmt.run(msg.id, msg.interactionId, msg.role, msg.content, msg.sentAt ?? new Date().toISOString(), toolUsageJson);
 }
 
 export function insertCluster(cluster: Cluster): void {
     insertClusterStmt.run(cluster.id, cluster.uploadId ?? null, cluster.courseId ?? null, cluster.topic, cluster.summary)
+}
+
+export function insertQuizQuestion(q: { id: string; interactionId: string; question: string; type: 'mcq' | 'short' | 'tf'; source?: string; extra?: string }): void {
+    insertQuizQuestionStmt.run(q.id, q.interactionId, q.question, q.type, q.source ?? null, q.extra ?? null);
 }
 
 export function insertIndexTree(documentId: string, nodes: IndexNode[], parentId: string | null = null, startOrder = 0): number {

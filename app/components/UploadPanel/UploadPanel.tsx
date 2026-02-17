@@ -124,7 +124,7 @@ export default function UploadPanel() {
         ) : (
           <>
             <div className={styles.dropEmpty}>
-              <div className={styles.dropIcon}>◡̈</div>
+              <div className={styles.dropText}>( ͡° ͜ʖ ͡°)</div>
               <div className={styles.dropText}>drag & drop</div>
               <div className={styles.dropHint}>or click to add your course material here!</div>
             </div>

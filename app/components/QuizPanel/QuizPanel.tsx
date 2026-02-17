@@ -24,9 +24,8 @@ function getSectionTitle(id: string, nodes: IndexNode[]): string {
 }
 
 const mockQuestions: QuizQuestion[] = [
-  { id: 'q1', question: 'What are the main components of a CPU?', type: 'short' },
-  { id: 'q2', question: 'A variable can change its type during runtime in Python.', type: 'tf' },
-  { id: 'q3', question: 'Which data structure uses LIFO ordering?', type: 'mcq' },
+  { id: 'q1', question: 'A variable can change its type during runtime in Python.', type: 'tf' },
+  { id: 'q2', question: 'Which data structure uses LIFO ordering?', type: 'mcq' },
 ];
 
 export default function QuizPanel({ selectedSections, indexNodes = [] }: QuizPanelProps) {
@@ -63,7 +62,6 @@ export default function QuizPanel({ selectedSections, indexNodes = [] }: QuizPan
         <select className={styles.select} value={quizType} onChange={e => setQuizType(e.target.value)}>
           <option value="mixed">Mixed</option>
           <option value="mcq">Multiple choice</option>
-          <option value="short">Short answer</option>
           <option value="tf">True/False</option>
         </select>
       </div>

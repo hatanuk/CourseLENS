@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import type { Course, Interaction } from '../data/structures';
 import type { TopicWithChunks } from './page';
@@ -9,6 +9,8 @@ import styles from './courses.module.css';
 import type { Document } from '../data/structures';
 import { FileQuestion, MessageCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+
+const STORAGE_KEY = 'courses-selected-id';
 
 interface Props {
   courses: Course[];
@@ -26,6 +28,16 @@ export default function CoursesClient({
   totalQuestionsByCourse,
 }: Props) {
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(courses[0]?.id ?? null);
+
+  useEffect(() => {
+    const stored = sessionStorage.getItem(STORAGE_KEY);
+    if (stored && courses.some((c) => c.id === stored)) setSelectedCourseId(stored);
+  }, [courses]);
+
+  const handleSelect = (id: string) => {
+    setSelectedCourseId(id);
+    sessionStorage.setItem(STORAGE_KEY, id);
+  };
 
   const selectedCourse = selectedCourseId ? courses.find((c) => c.id === selectedCourseId) : null;
   const selectedInteractions = selectedCourseId ? (interactionsByCourse[selectedCourseId].sort((a, b) => (a.date > b.date ? -1 : 1))  ?? []) : [];
@@ -51,7 +63,8 @@ export default function CoursesClient({
           courses={courses}
           courseDocs={courseDocs}
           selectedId={selectedCourseId}
-          onSelect={setSelectedCourseId}
+          onSelect={handleSelect}
+          onCourseCreated={() => router.refresh()}
         />
       </aside>
 
@@ -83,7 +96,7 @@ export default function CoursesClient({
                       href={
                         session.type === 'chat'
                           ? `/course/${selectedCourseId}/chat/${session.id}`
-                          : `/course/${selectedCourseId}`
+                          : `/course/${selectedCourseId}/quiz/${session.id}`
                       }
                       className={styles.sessionCard}
                     >
@@ -132,7 +145,7 @@ export default function CoursesClient({
                   className={styles.actionBtn}
                 >
                   <MessageCircle size={20} />
-                  Chat about course
+                  Chat with Lenny
                 </button>
               </div>
             </div>

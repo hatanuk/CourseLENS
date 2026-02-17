@@ -1,16 +1,69 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import type { ChatMessage } from '@/app/data/structures';
+import type { ChatMessage, GeneratedQuestionSet } from '@/app/data/structures';
 import styles from './ChatPageClient.module.css';
 const MAX_MESSAGE_CHARS = 50_000;
+
+function parseQuestionSet(result: string): GeneratedQuestionSet | null {
+  try {
+    const cleaned = result.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+    const parsed = JSON.parse(cleaned) as GeneratedQuestionSet;
+    if (parsed?.questions && Array.isArray(parsed.questions)) return parsed;
+  } catch {
+    /* ignore */
+  }
+  return null;
+}
+
+function QuestionSetDisplay({ data }: { data: GeneratedQuestionSet }) {
+  const [revealed, setRevealed] = useState<Set<number>>(new Set());
+  const toggle = (i: number) => setRevealed((s) => new Set(s).add(i));
+
+  return (
+    <div className={styles.questionSet}>
+      {data.topic && <div className={styles.questionSetTopic}>{data.topic}</div>}
+      {data.questions.map((q, i) => (
+        <div key={i} className={styles.questionItem}>
+          <div className={styles.questionText}>
+            <span className={styles.questionNum}>{i + 1}.</span> {q.text}
+          </div>
+          {q.options && (
+            <ul className={styles.questionOptions}>
+              {q.options.map((opt, j) => (
+                <li key={j} className={revealed.has(i) && q.correct === j ? styles.correct : ''}>
+                  {String.fromCharCode(65 + j)}. {opt}
+                </li>
+              ))}
+            </ul>
+          )}
+          {typeof q.correct === 'boolean' && revealed.has(i) && (
+            <div className={q.correct ? styles.tfAnswerTrue : styles.tfAnswerFalse}>
+              Answer: {q.correct ? 'True' : 'False'}
+            </div>
+          )}
+          {(q.options || typeof q.correct === 'boolean') && (
+          <button
+            type="button"
+            className={styles.revealBtn}
+            onClick={() => toggle(i)}
+          >
+            {revealed.has(i) ? '✓ Revealed' : 'Reveal answer'}
+          </button>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
 
 interface Props {
   courseId: string;
   courseName: string;
   chatId: string;
   initialMessages: ChatMessage[];
+  initialQuestions?: GeneratedQuestionSet[];
 }
 
 function CollapsibleContext({ content, courseId }: { content: string; courseId: string }) {
@@ -101,11 +154,17 @@ export default function ChatPageClient({
   courseName,
   chatId,
   initialMessages,
+  initialQuestions = [],
 }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [input, setInput] = useState('');
   const [canSend, setCanSend] = useState(true);
   const [sendError, setSendError] = useState<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+  }, [messages]);
 
   const handleSend = async () => {
     if (!canSend) return;
@@ -170,24 +229,39 @@ export default function ChatPageClient({
 
       <div className={styles.chatPanel}>
         <div className={styles.messages}>
+          {initialQuestions.length > 0 && (
+            <div className={styles.savedQuestionsSection}>
+              <div className={styles.savedQuestionsLabel}>Practice questions</div>
+              {initialQuestions.map((set, idx) => (
+                <QuestionSetDisplay key={idx} data={set} />
+              ))}
+            </div>
+          )}
           {messages.length === 0 && !sendError ? (
-            <p className={styles.empty}>Start a conversation about your course.</p>
+            <p className={styles.empty}>So, what would you like to know? ( ͡° ͜ʖ ͡°)</p>
           ) : (
             <>
             {messages.map((msg) => (
               <div key={msg.id} className={`${styles.message} ${styles[msg.role]}`}>
-                <div className={styles.messageRole}>{msg.role === 'user' ? 'You' : 'Assistant'}</div>
+                <div className={styles.messageRole}>{msg.role === 'user' ? 'You' : 'Lenny ( ͡° ͜ʖ ͡°)'}</div>
                 {msg.role === 'assistant' && msg.toolUsage?.length ? (
                   <div className={styles.toolUsage}>
-                    {msg.toolUsage.map((t, i) => (
-                      <div key={i} className={styles.toolItem}>
-                        <span className={styles.toolName}>{t.tool_name}</span>
-                        <span className={styles.toolArgs}>{JSON.stringify(t.args)}</span>
-                        {t.result ? (
-                          <CollapsibleContext content={t.result} courseId={courseId} />
-                        ) : null}
-                      </div>
-                    ))}
+                    {msg.toolUsage.map((t, i) => {
+                      const questionSet = t.tool_name === 'generate_question'
+                        ? (t.artifact ?? (t.result ? parseQuestionSet(t.result) : null))
+                        : null;
+                      return (
+                        <div key={i} className={styles.toolItem}>
+                          <span className={styles.toolName}>{t.tool_name}</span>
+                          <span className={styles.toolArgs}>{JSON.stringify(t.args)}</span>
+                          {questionSet ? (
+                            <QuestionSetDisplay data={questionSet} />
+                          ) : t.result && t.tool_name === 'retrieve_context' ? (
+                            <CollapsibleContext content={t.result} courseId={courseId} />
+                          ) : null}
+                        </div>
+                      );
+                    })}
                   </div>
                 ) : null}
                 <div className={styles.messageContent}>{msg.content}</div>
@@ -195,10 +269,11 @@ export default function ChatPageClient({
             ))}
             {!canSend && (
               <div className={`${styles.message} ${styles.assistant}`}>
-                <div className={styles.messageRole}>Assistant</div>
+                <div className={styles.messageRole}>Lenny ( ͡° ͜ʖ ͡°)</div>
                 <div className={styles.loadingIndicator} />
               </div>
             )}
+            <div ref={messagesEndRef} />
             </>
           )}
         </div>

@@ -6,7 +6,7 @@ import umap
 import numpy as np
 import os
 from setup import app, chat_model, agent, vector_store, embedding_model
-from tools import course_id_var
+from tools import course_id_var, topics_var, generate_question_set
 
 MIN_CLUSTER_SIZE = 5
 MAX_CLUSTER_SIZE = 300
@@ -24,10 +24,18 @@ class ChatRequest(BaseModel):
     course_id: str | None = None
 
 
+class GenerateQuestionSetRequest(BaseModel):
+    course_id: str
+    cluster_ids: list[str] | None = None
+    question_types: list[str] = ["multiple_choice"]
+    count: int = 5
+
+
 @app.post("/chat")
 def chat(request: ChatRequest):
     content = request.content
     course_id_var.set(request.course_id)
+    topics_var.set(request.topics)
     tool_calls_log = []
     pending_calls = {}
     response = None
@@ -51,8 +59,11 @@ def chat(request: ChatRequest):
         if isinstance(last, ToolMessage):
             call_id = last.tool_call_id
             if call_id in pending_calls:
-                pending_calls[call_id]["result"] = last.content
-                tool_calls_log.append(pending_calls.pop(call_id))
+                entry = pending_calls.pop(call_id)
+                entry["result"] = last.content
+                if hasattr(last, "artifact") and last.artifact is not None:
+                    entry["artifact"] = last.artifact
+                tool_calls_log.append(entry)
 
         if isinstance(last, AIMessage) and not last.tool_calls:
             response = last.content
@@ -62,6 +73,17 @@ def chat(request: ChatRequest):
         "tool_log": tool_calls_log
     }
 
+
+@app.post("/generate-question-set")
+def generate_question_set_endpoint(request: GenerateQuestionSetRequest):
+    result = generate_question_set(
+        course_id=request.course_id,
+        cluster_ids=request.cluster_ids,
+        question_types=request.question_types,
+        count=request.count,
+    )
+    return {"question_sets": result}
+    
 
 @app.post("/embed")
 def embed(request: EmbedRequest):

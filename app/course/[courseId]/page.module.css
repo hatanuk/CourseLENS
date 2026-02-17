@@ -19,11 +19,17 @@
 
 .searchInput {
   width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: var(--input-padding);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   font-size: 1rem;
   margin-bottom: 1rem;
+  background: var(--color-bg-card);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
 }
 
 .docList {
@@ -122,17 +128,17 @@
   align-items: center;
   gap: 1rem;
   padding: 1rem;
-  background: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
   text-decoration: none;
   color: inherit;
   transition: border-color 0.15s, background 0.15s;
 }
 
 .sessionCard:hover {
-  border-color: #4a4a6a;
-  background: #f8f8ff;
+  border-color: var(--color-primary);
+  background: var(--color-selected);
 }
 
 .seeMore {

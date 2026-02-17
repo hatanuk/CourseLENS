@@ -1,4 +1,4 @@
-import { getCourse, getInteractionById, getChatMessages } from '@/app/db/queries';
+import { getCourse, getInteractionById, getChatMessages, getChatGeneratedQuestions } from '@/app/db/queries';
 import { insertInteraction } from '@/app/db/queries';
 import ChatPageClient from './ChatPageClient';
 import TopBar from '@/app/components/TopBar';
@@ -6,6 +6,8 @@ import TopBar from '@/app/components/TopBar';
 interface PageProps {
   params: Promise<{ courseId: string; chatId: string }>;
 }
+
+export const dynamic = 'force-dynamic';
 
 export default async function ChatPage({ params }: PageProps) {
   const { courseId, chatId } = await params;
@@ -36,6 +38,7 @@ export default async function ChatPage({ params }: PageProps) {
   }
 
   const messages = getChatMessages(chatId);
+  const initialQuestions = getChatGeneratedQuestions(chatId);
 
   return (
     <>
@@ -45,6 +48,7 @@ export default async function ChatPage({ params }: PageProps) {
         courseName={course.name}
         chatId={chatId}
         initialMessages={messages}
+        initialQuestions={initialQuestions}
       />
     </>
   );

@@ -21,8 +21,14 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem;
-  background: #f9f9f9;
-  border-radius: 6px;
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.session:hover {
+  border-color: var(--color-text-hint);
 }
 
 .sessionIcon {
@@ -40,18 +46,19 @@
 
 .sessionDate {
   font-size: 1rem;
-  color: #999;
+  color: var(--color-text-hint);
 }
 
 .openBtn {
   padding: 0.3rem 0.6rem;
-  background: #e5e5e5;
-  border: none;
-  border-radius: 4px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
   font-size: 1rem;
   cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
 }
 
 .openBtn:hover {
-  background: #d5d5d5;
+  background: var(--color-border);
 }

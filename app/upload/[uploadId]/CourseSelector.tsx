@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { Course } from '@/app/data/structures';
+import SelectDropdown from '@/app/components/SelectDropdown/SelectDropdown';
 import styles from './UploadPage.module.css';
 
 type CourseOption = { id: string; name: string } | null;
@@ -71,24 +72,17 @@ export default function CourseSelector({ courses, selected, onSelect, disabled }
         </div>
       ) : (
         <div className={styles.optionGroup}>
-          <select
-            className={styles.select}
-            value={selected?.id ?? ''}
-            onChange={(e) => {
-              const id = e.target.value;
-              if (!id) onSelect(null);
-              else {
-                const c = courses.find((x) => x.id === id);
-                if (c) onSelect({ id: c.id, name: c.name });
-              }
+          <SelectDropdown
+            items={courses.map((c) => ({ id: c.id, label: c.name }))}
+            selectedIds={selected ? new Set([selected.id]) : new Set()}
+            onSelect={(id) => {
+              const c = courses.find((x) => x.id === id);
+              if (c) onSelect({ id: c.id, name: c.name });
             }}
+            onClear={() => onSelect(null)}
+            placeholder="Select a course"
             disabled={disabled}
-          >
-            <option value="">Select a course</option>
-            {courses.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
+          />
           <button
             type="button"
             className={styles.segmentedBtn}

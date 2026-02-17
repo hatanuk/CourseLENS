@@ -59,25 +59,37 @@
 
 .card {
   padding: 1rem;
-  background: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: 0.25rem;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  min-height: 70px;
   cursor: pointer;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.card.expanded {
+  justify-content: flex-start;
 }
 
 .card:hover {
-  border-color: #999;
+  border-color: var(--color-text-hint);
 }
 
 .card.selected {
-  border-color: #4a4a6a;
-  background: #f8f8ff;
+  border-color: var(--color-primary);
+  background: var(--color-selected);
 }
 
 .name {
-  margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
   font-weight: 500;
+  flex-shrink: 0;
 }
 
 .progress {
@@ -95,4 +107,90 @@
   height: 100%;
   background: #16a34a;
   transition: width 0.3s;
+}
+
+.newCourseBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--color-bg-card);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.newCourseBtn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-text);
+}
+
+.createForm {
+  padding: 1rem;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.createInput {
+  padding: var(--input-padding);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  background: var(--color-bg-card);
+}
+
+.createInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.createError {
+  font-size: 0.85rem;
+  color: #dc2626;
+}
+
+.createActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.createBtn {
+  padding: 0.4rem 0.75rem;
+  background: #22c55e;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.createBtn:hover:not(:disabled) {
+  background: #16a34a;
+}
+
+.createBtn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.cancelBtn {
+  padding: 0.4rem 0.75rem;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.cancelBtn:hover {
+  color: var(--color-text);
 }

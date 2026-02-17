@@ -47,6 +47,21 @@
   font-size: 0.95rem;
 }
 
+.savedQuestionsSection {
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  background: #f0f4f8;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.savedQuestionsLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #4a4a6a;
+  margin-bottom: 0.5rem;
+}
+
 .errorBubble {
   margin: 0 1.5rem 1rem;
   padding: 0.6rem 1rem;
@@ -70,7 +85,7 @@
 }
 
 .messageRole {
-  font-size: 0.85rem;
+  font-size: 1rem;
   color: #999;
   margin-bottom: 0.2rem;
 }
@@ -101,6 +116,87 @@
   margin-left: 0.4rem;
   color: #666;
   font-family: monospace;
+}
+
+.questionSet {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: #fff;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+}
+
+.questionSetTopic {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 0.75rem;
+}
+
+.questionItem {
+  margin-bottom: 1rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.questionItem:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.questionText {
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.questionNum {
+  font-weight: 600;
+  color: #4a4a6a;
+  margin-right: 0.25rem;
+}
+
+.questionOptions {
+  margin: 0.25rem 0 0.5rem 1.25rem;
+  padding: 0;
+  list-style: none;
+}
+
+.questionOptions li {
+  padding: 0.25rem 0;
+  font-size: 0.9rem;
+}
+
+.questionOptions li.correct {
+  color: var(--color-success);
+  font-weight: 600;
+}
+
+.tfAnswerTrue {
+  font-size: 0.85rem;
+  color: var(--color-success);
+  font-weight: 600;
+  margin: 0.25rem 0;
+}
+
+.tfAnswerFalse {
+  font-size: 0.85rem;
+  color: var(--color-error);
+  font-weight: 600;
+  margin: 0.25rem 0;
+}
+
+.revealBtn {
+  font-size: 0.8rem;
+  padding: 0.3rem 0.6rem;
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--color-primary);
+}
+
+.revealBtn:hover {
+  background: var(--color-bg);
 }
 
 .toolResult {
@@ -251,27 +347,28 @@
 
 .input {
   flex: 1;
-  padding: 0.6rem 1rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  padding: var(--input-padding);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   font-size: 1rem;
+  background: var(--color-bg-card);
 }
 
 .input:focus {
   outline: none;
-  border-color: #4a4a6a;
+  border-color: var(--color-primary);
 }
 
 .sendBtn {
   padding: 0.6rem 1.25rem;
-  background: #4a4a6a;
+  background: var(--color-primary);
   color: #fff;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-size: 1rem;
 }
 
 .sendBtn:hover {
-  background: #5a5a8a;
+  background: var(--color-primary-hover);
 }

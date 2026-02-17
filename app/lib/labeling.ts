@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 import { z } from "zod";
 
-const MAX_SUMMARY = 1000
+const MAX_SUMMARY = 400
 
 const TopicResponseSchema = z.object({
   topic: z.string().min(1).max(100).transform((s) => s.trim()),
@@ -28,7 +28,7 @@ async function labelOneCluster(
             content: `You are a topic naming and summarizing assistant. 
           Given a set of text chunks from a document cluster, assign a short, 
           descriptive topic name (2-6 words) that captures the main theme, 
-          and summarize the main ideas (3-10 sentences, max ${MAX_SUMMARY} chars) present in the cluster. 
+          and write a brief summary of the main ideas in 3-5 sentences (max ${MAX_SUMMARY} chars). 
           Respond with a JSON object: {"topic": "your topic name", "summary": "your summary"}`,
           },
           {

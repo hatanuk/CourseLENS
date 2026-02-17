@@ -86,3 +86,10 @@ db.exec(`
     );
 `);
 
+// Migration: add toolUsage to chatMessages if missing
+try {
+  db.exec("ALTER TABLE chatMessages ADD COLUMN toolUsage TEXT");
+} catch {
+  /* column may already exist */
+}
+
