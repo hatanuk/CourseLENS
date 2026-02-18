@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"next dev\" \"cd app/embeddings-server && ../../venv/bin/python -m uvicorn main:app --reload --port 8000\"",
+    "dev": "concurrently \"next dev\" \"bash scripts/start-embeddings-server.sh\"",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",

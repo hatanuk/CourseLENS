@@ -28,7 +28,7 @@ export default async function OptionsPage({
     <>
       <TopBar />
       <div className={styles.container}>
-        <OptionsPageClient courseName={course?.name ?? null} files={files} />
+        <OptionsPageClient courseName={course?.name ?? null} courseId={courseId ?? null} />
       </div>
     </>
   );

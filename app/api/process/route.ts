@@ -6,7 +6,7 @@ import { getUpload, getAllFileMetadataByUploadId, insertCluster, insertDocument,
 import { fileMetadataToDocument } from "@/app/data/structures";
 import { elementsToChunks, extractAndSaveImages, processWithUnstructured } from "@/app/lib/unstructured";
 import { labelClusters } from "@/app/lib/labeling";
-import { QdrantPoint, upsertPoints } from "@/app/lib/qdrant";
+import { ensureCollection, QdrantPoint, upsertPoints } from "@/app/lib/qdrant";
 
 const PYTHON_URL = process.env.PYTHON_API_URL ?? "http://localhost:8000"
 
@@ -67,6 +67,8 @@ export async function POST(request: Request) {
                 controller.enqueue(encoder.encode(sse(event, data)));
 
             try {
+                await ensureCollection();
+
                 const totalFiles = files.length;
                 const parseWeight = 25;
                 const embedWeight = 25;
@@ -161,12 +163,28 @@ export async function POST(request: Request) {
     });
 }
 
+const EMBED_TIMEOUT_MS = 120_000;
+
 async function embedAndCluster(chunks: string[]) {
-    const res = await fetch(`${PYTHON_URL}/embed`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ chunks }),
-    });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), EMBED_TIMEOUT_MS);
+    let res: Response;
+    try {
+        res = await fetch(`${PYTHON_URL}/embed`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ chunks }),
+            signal: controller.signal,
+        });
+    } catch (err) {
+        clearTimeout(timeout);
+        const msg = err instanceof Error ? err.message : String(err);
+        if (msg.includes("abort") || msg.includes("timeout")) {
+            throw new Error(`Embedding timed out after ${EMBED_TIMEOUT_MS / 1000}s.`);
+        }
+        throw new Error(`Cannot reach embeddings server at ${PYTHON_URL}.`);
+    }
+    clearTimeout(timeout);
 
     if (!res.ok) {
         const text = await res.text();

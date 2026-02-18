@@ -22,6 +22,7 @@ class ChatRequest(BaseModel):
     content: str
     messages: list[ChatMessage] = []
     course_id: str | None = None
+    topics: list[dict] | None = None
 
 
 class GenerateQuestionSetRequest(BaseModel):
