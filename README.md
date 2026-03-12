@@ -1,5 +1,5 @@
 
-![](https://ibb.co/tMVqGCvd)
+![Screenshot](public/images/screenshot.png)
 
 **CourseLENS** is an application designed to help with studying by collecting learning material of various formats, and embedding it into a single space. 
 This effectively allows the whole course's content to be queried, and, bundled with a chat agent (Lenny) and question generation features, could come quite useful as a study tool.
